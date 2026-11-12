@@ -265,13 +265,16 @@ WSGI_APPLICATION = "vsproject.wsgi.application"
 #    }
 #}
 
+# Safe development defaults. Real credentials belong in settings.local
+# or environment variables; production.py always requires DB_* environment values.
 DATABASES = {
-    'default': {
-	"ENGINE": "django.db.backends.postgresql",
-        "NAME": "a1020391_django_radio",
-        "USER": "a1020391_django_radio",
-        "PASSWORD": "***",
-        "HOST": "localhost",
+    "default": {
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("DB_NAME", "wagtail_dev"),
+        "USER": os.environ.get("DB_USER", "wagtail_dev"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     },
     # Легаси-алиас "legacy" (MySQL a1020391_zenway/floppygames — WordPress-эпоха)
     # УДАЛЁН по решению владельца (2026-11-05): миграция завершена, блок
