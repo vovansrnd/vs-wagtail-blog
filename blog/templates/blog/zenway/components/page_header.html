@@ -1,0 +1,18 @@
+{% load blog_tags %}
+<header class="page-header">
+    <div class="page-title-block">
+        <h1 class="page-title">{{ header_title }}</h1>
+    </div>
+    {% if entries %}
+        <div class="view-controls" style="justify-content: flex-end;">
+            <div class="view-info">
+                <span class="posts-count">
+                    <i class="fas {{ header_icon|default:'fa-newspaper' }}"
+                       aria-hidden="true"></i>
+                    <strong>{{ entries.paginator.count|default:0 }}</strong>
+                    <span>{{ entries.paginator.count|default:0|ru_pluralize:"запись,записи,записей" }}</span>
+                </span>
+            </div>
+        </div>
+    {% endif %}
+</header>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags blog_tags %}
+
+{% block title %}Поиск{% if search_query %}: {{ search_query }}{% endif %} - Vs-Svet{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Поиск{% if search_query %}: "{{ search_query }}"{% endif %}</h1>
+
+    {% if search_query %}
+        {% if search_results %}
+            <p class="search-info">Найдено записей: <strong>{{ search_results.paginator.count }}</strong></p>
+
+            {% for result in search_results %}
+                <article class="post-preview" style="--index: {{ forloop.counter0 }};">
+                    {% include "blog/nova/post_preview.html" with post=result.specific %}
+                </article>
+            {% endfor %}
+
+            {% if search_results.has_other_pages %}
+                <nav class="pagination-wrapper" role="navigation" aria-label="Постраничная навигация">
+                    {% include "blog/nova/components/pagination.html" with blogs=search_results %}
+                </nav>
+            {% endif %}
+        {% else %}
+            <p class="no-results">По вашему запросу "<strong>{{ search_query }}</strong>" ничего не найдено.</p>
+        {% endif %}
+    {% else %}
+        <p class="no-query">Пожалуйста, введите запрос в поле поиска.</p>
+    {% endif %}
+{% endblock %}

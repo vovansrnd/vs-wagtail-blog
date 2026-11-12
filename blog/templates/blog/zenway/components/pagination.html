@@ -1,0 +1,33 @@
+{% load blog_tags %}
+{% with current=blogs.number total=blogs.paginator.num_pages %}
+    {% if total > 1 %}
+        <nav class="pagination" aria-label="Пагинация">
+            {% if blogs.has_previous %}
+                <a class="pag-btn pag-arrow"
+                   href="{% url_replace page=blogs.previous_page_number %}"
+                   rel="prev"
+                   aria-label="Предыдущая">&laquo;</a>
+            {% else %}
+                <span class="pag-btn pag-arrow pag-disabled" aria-disabled="true">&laquo;</span>
+            {% endif %}
+            {% smart_page_range blogs on_each_side=2 on_ends=1 as page_range_items %}
+            {% for item in page_range_items %}
+                {% if item == current %}
+                    <span class="pag-btn pag-current" aria-current="page">{{ item }}</span>
+                {% elif item == "..." %}
+                    <span class="pag-dots">&middot;&middot;&middot;</span>
+                {% else %}
+                    <a class="pag-btn" href="{% url_replace page=item %}">{{ item }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if blogs.has_next %}
+                <a class="pag-btn pag-arrow"
+                   href="{% url_replace page=blogs.next_page_number %}"
+                   rel="next"
+                   aria-label="Следующая">&raquo;</a>
+            {% else %}
+                <span class="pag-btn pag-arrow pag-disabled" aria-disabled="true">&raquo;</span>
+            {% endif %}
+        </nav>
+    {% endif %}
+{% endwith %}

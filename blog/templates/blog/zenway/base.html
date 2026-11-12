@@ -1,0 +1,341 @@
+{% load static wagtailcore_tags blog_tags wagtailimages_tags socialaccount mptt_comment_tags %}
+{% load wagtailsettings_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+            {% block title %}
+                {% if page %}
+                    {{ page.seo_title|default:page.title }}
+                {% else %}
+                    ZenWay
+                {% endif %}
+            {% endblock %}
+            — ZenWay.ru
+        </title>
+        {% block meta_description %}
+            <meta name="description" content="{{ page.search_description|default:'GNU/Linux — это интересно' }}">
+        {% endblock %}
+        {% if page.seo_keywords %}<meta name="keywords" content="{{ page.seo_keywords }}">{% endif %}
+        <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+        {% if page %}
+            <meta property="og:url" content="{{ page.get_full_url }}">
+            <meta property="og:title" content="{{ page.seo_title|default:page.title }}">
+            {% if page.main_image and page.main_image.file %}
+                {% image page.main_image fill-1200x630 as og_image %}
+                <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ og_image.url }}">
+            {% endif %}
+            {% if page.excerpt %}
+                <meta property="og:description" content="{{ page.excerpt|striptags }}">
+            {% elif page.search_description %}
+                <meta property="og:description" content="{{ page.search_description }}">
+            {% elif page.body %}
+                <meta property="og:description" content="{{ page.body|striptags|truncatewords:25 }}">
+            {% endif %}
+        {% endif %}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <link rel="stylesheet" href="{% static 'css/zenway.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed/">
+
+        {% block meta_robots %}{% endblock %}
+        {% block extra_head %}{% endblock %}
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body>
+    {% get_settings as site_settings %}
+    {% with blog_settings=site_settings.blog.BlogSettings %}
+        <div id="topbar-con">
+            <div id="topbar">
+                <div class="zw-topbar-inner">
+                    <div class="zw-topbar-brand">
+                        <a href="/">ZenWay.ru</a>
+                    </div>
+                    <div class="zw-topbar-right">
+                        <form class="zw-top-search" action="/search/" method="get">
+                            <input type="search" name="query" placeholder="что искать?" aria-label="Поиск">
+                            <button type="submit" aria-label="Искать">
+                                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                        
+                            <div class="zw-login-dropdown" data-auth-menu>
+                                <button type="button" class="zw-login-trigger" aria-expanded="false" aria-controls="zw-login-panel">
+                                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> Войти
+                                    <i class="fa-solid fa-chevron-down zw-login-chevron" aria-hidden="true"></i>
+                                </button>
+                                <ul id="zw-login-panel" class="zw-login-panel" role="menu">
+                                    <li>
+                                        <a href="{% url 'account_login' %}" class="zw-login-item">
+                                            <i class="fa-solid fa-lock" aria-hidden="true"></i> Войти с паролем
+                                        </a>
+                                    </li>
+                                    <li class="zw-login-sep"></li>
+                                    <li>
+                                        {% if 'yandex'|social_provider_enabled %}
+                                          <a href="{% provider_login_url 'yandex' %}?next=/" class="zw-login-item zw-login-yandex"><i class="fa-brands fa-yandex" aria-hidden="true"></i> Войти через Яндекс</a>
+                                        {% endif %}
+                                    </li>
+                                    <li>
+                                        {% if 'github'|social_provider_enabled %}
+                                          <a href="{% provider_login_url 'github' %}?next=/" class="zw-login-item zw-login-github"><i class="fa-brands fa-github" aria-hidden="true"></i> Войти через GitHub</a>
+                                        {% endif %}
+                                    </li>
+                                    <li class="zw-login-sep"></li>
+                                    <li>
+                                        <a href="{% url 'account_signup' %}" class="zw-login-item zw-login-signup">
+                                            <i class="fa-solid fa-user-plus" aria-hidden="true"></i> Регистрация
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+<script src="{% static "js/personal-bar.js" %}?v=4" defer></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="top">
+            <div class="zw-content">
+                <nav id="menu" aria-label="Основная навигация">
+                    <ul>
+                        <li class="{% if request.path == '/' %}current{% endif %}">
+                            <a href="/"><span>Главная</span></a>
+                        </li>
+                        <li class="{% if '/forum/' in request.path %}current{% endif %}">
+                            <a href="/forum/"><span>Форум</span></a>
+                        </li>
+                        <li class="{% if '/about/' in request.path %}current{% endif %}">
+                            <a href="/about/"><span>О сайте</span></a>
+                        </li>
+                        <li>
+                            <a href="https://vs-svet.ru/contact/" target="_blank" rel="noopener noreferrer">
+                                <span>Контакты</span>
+                            </a>
+                        </li>
+                        <li class="{% if '/archive/' in request.path %}current{% endif %}">
+                            <a href="/archive/"><span>Архив</span></a>
+                        </li>
+                        <li>
+                            <a href="/feed/"><span><i class="fa-solid fa-rss" aria-hidden="true"></i> RSS</span></a>
+                        </li>
+                    </ul>
+                </nav>
+                <a href="/" class="zw-logo" aria-label="ZenWay — на главную">
+                    <div class="zw-logo-title">GNU/Linux</div>
+                    <div class="zw-logo-sub">это интересно</div>
+                </a>
+            </div>
+        </div>
+
+        {% if blog_settings.show_announcement and blog_settings.featured_product %}
+            <div class="zw-announcement">
+                <div class="zw-content">
+                    <span>{{ blog_settings.announcement_text }}</span>
+                    <a href="{{ blog_settings.featured_product.url }}" class="zw-ann-cta">{{ blog_settings.announcement_cta }}</a>
+                </div>
+            </div>
+        {% endif %}
+
+        <div id="main">
+            <div class="zw-content zw-layout">
+                <div id="left_side">
+                    <div class="mpart">
+                        {% block content %}{% endblock %}
+                    </div>
+                </div>
+
+                <aside class="right_side" id="sidebar" aria-label="Сайдбар">
+                    {# 1. Продукт #}
+                    {% if blog_settings.featured_product %}
+                        {% include "blog/zenway/components/product_widget.html" with product=blog_settings.featured_product %}
+                    {% endif %}
+
+                    {# 2. Рубрики #}
+                    {% get_categories_for_tree as categories_data %}
+                    {% include "blog/zenway/components/categories_tree.html" with nodes=categories_data.nodes current_slug=categories_data.current_slug %}
+
+                    {# 3. Последние статьи #}
+                    {% get_latest_posts 5 as latest_posts_list %}
+                    {% include "blog/zenway/components/latest_posts.html" with latest_posts=latest_posts_list %}
+
+                    {# 4. Мини-обзоры #}
+                    {% include "blog/zenway/components/mini_posts.html" %}
+
+                    {# 4.1. Рубрика howtos #}
+                    {% get_latest_posts_by_category 'howtos' 10 1 as howto_posts %}
+                    {% include "blog/zenway/components/howtos_posts.html" with howto_posts=howto_posts %}
+
+                    {# 5. Облако: Техника #}
+                    {% get_tags_for_cloud 'tech' as tech_tags %}
+                    {% if tech_tags %}
+                        {% include "blog/zenway/components/tags_cloud.html" with tags=tech_tags title="Теги: Техника" %}
+                    {% endif %}
+
+                    {# 6. Облако: Разное #}
+                    {% get_tags_for_cloud 'life' as life_tags %}
+                    {% if life_tags %}
+                        {% include "blog/zenway/components/tags_cloud.html" with tags=life_tags title="Теги: Разное" %}
+                    {% endif %}
+
+                    {# 7. Комментарии #}
+                    <div class="widget">
+                        <div class="widget-title">
+                            <i class="fa-solid fa-comments" aria-hidden="true"></i> Комментарии
+                        </div>
+                        <div class="zw-comments-widget">
+                            {% get_latest_comments 8 as sidebar_comments %}
+                            {% regroup sidebar_comments by page as comments_by_page %}
+                            {% for group in comments_by_page %}
+                                <div class="zw-cw-post-title">
+                                    <a href="{% pageurl group.grouper %}">{{ group.grouper.title|truncatechars:40 }}</a>
+                                </div>
+                                <ul class="zw-cw-list">
+                                    {% for c in group.list %}
+                                        <li>
+                                            <a href="{% pageurl group.grouper %}#comment-{{ c.id }}">
+                                                <strong>{{ c.display_author_name }}</strong>
+                                                <span>{{ c.content|striptags|truncatewords:10 }}</span>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% empty %}
+                                <p class="zw-cw-empty">Пока нет комментариев.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {# 7.5. Форум #}
+                    {% include "blog/zenway/components/forum_latest.html" %}
+                </aside>
+            </div>
+        </div>
+
+        <footer id="footer">
+            <div class="zw-content zw-footer-inner">
+                <div class="zw-footer-cols">
+                    <div class="zw-footer-col zw-footer-about">
+                        <div class="zw-footer-heading">О сайте</div>
+                        <p>Обзоры Linux-программ, дистрибутивов, утилит и всего, что делает GNU/Linux интереснее.</p>
+                        <div class="zw-footer-social">
+                            <a href="/feed/" title="RSS Feed" aria-label="RSS Feed">
+                                <i class="fa-solid fa-rss" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://vk.com/" title="VKontakte" aria-label="VKontakte" rel="noopener noreferrer" target="_blank">
+                                <i class="fa-brands fa-vk" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="zw-footer-col zw-footer-nav">
+                        <div class="zw-footer-heading">Навигация</div>
+                        <nav aria-label="Навигация в подвале">
+                            <ul>
+                                <li><a href="/">Главная</a></li>
+                                <li><a href="/forum/">Форум</a></li>
+                                <li><a href="/about/">О сайте</a></li>
+                                <li><a href="https://vs-svet.ru/contact/" target="_blank" rel="noopener noreferrer">Контакты</a></li>
+                                <li><a href="/archive/">Архив</a></li>
+                                <li><a href="/feed/">RSS</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="zw-footer-col zw-footer-subscribe">
+                        <div class="zw-footer-heading">Подписка</div>
+                        <p>Уведомления о новых статьях на почту:</p>
+                        <form class="zw-subscribe-form" action="/subscribe/" method="post" data-subscribe-form>
+                            <label for="zw-sub-email" class="sr-only">Email</label>
+                            <input type="email" id="zw-sub-email" name="email" autocomplete="email" placeholder="ваш@email.ru" required>
+                            <button type="submit" aria-label="Подписаться">OK</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="zw-footer-bottom">
+                    <span class="zw-copyright">&copy; {% now "Y" %} ZenWay.ru. Все права защищены.</span>
+                    <span class="zw-powered">
+                        Работает на <a href="https://wagtail.org/" target="_blank" rel="noopener noreferrer">Wagtail</a>
+                    </span>
+                </div>
+            </div>
+        </footer>
+
+        <button class="back-to-top" id="backToTopBtn" aria-label="Наверх">↑</button>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js" onload="hljs.highlightAll()"></script>
+        {% block extra_js %}{% endblock extra_js %}
+            <script>
+                (function () {
+                    'use strict';
+                    var btn = document.getElementById('backToTopBtn');
+                    if (btn) {
+                        window.addEventListener('scroll', function () {
+                            btn.classList.toggle('visible', window.pageYOffset > 400);
+                        });
+                        btn.addEventListener('click', function () {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        });
+                    }
+
+                    function initLoginDropdown() {
+                        var trigger = document.querySelector('.zw-login-trigger');
+                        var panel   = document.getElementById('zw-login-panel');
+                        if (!trigger || !panel) return;
+
+                        var overlay = document.createElement('div');
+                        overlay.className = 'zw-dropdown-overlay';
+                        document.body.appendChild(overlay);
+
+                        function open() {
+                            trigger.setAttribute('aria-expanded', 'true');
+                            trigger.closest('.zw-login-dropdown').classList.add('is-open');
+                            overlay.classList.add('is-active');
+                        }
+
+                        function close() {
+                            trigger.setAttribute('aria-expanded', 'false');
+                            trigger.closest('.zw-login-dropdown').classList.remove('is-open');
+                            overlay.classList.remove('is-active');
+                        }
+
+                        trigger.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            trigger.getAttribute('aria-expanded') === 'true' ? close() : open();
+                        });
+
+                        overlay.addEventListener('click', close);
+                        document.addEventListener('keydown', function (e) {
+                            if (e.key === 'Escape') closeAll();
+                        });
+                    }
+
+                    function highlightMenu() {
+                        var path  = window.location.pathname;
+                        var links = document.querySelectorAll('#menu a');
+                        links.forEach(function (a) {
+                            var href = a.getAttribute('href');
+                            if (href === '/' ? path === '/' : path.startsWith(href)) {
+                                a.parentElement.classList.add('current');
+                            }
+                        });
+                    }
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', function () {
+                            initLoginDropdown();
+                            highlightMenu();
+                        });
+                    } else {
+                        initLoginDropdown();
+                        highlightMenu();
+                    }
+                }());
+            </script>
+    {% endwith %}
+    </body>
+</html>

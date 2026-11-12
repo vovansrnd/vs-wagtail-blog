@@ -1,0 +1,18 @@
+{% extends "blog/floppy/base.html" %}
+{% load wagtailcore_tags blog_tags %}
+{% block extra_head %}
+    <link rel="canonical" href="{{ page.get_full_url }}">
+{% endblock extra_head %}
+{% block meta_description %}
+    <meta name="description" content="{{ page.search_description|truncatewords:25 }}">
+{% endblock meta_description %}
+{% block content %}
+    <div class="mso-type_home home_full">
+        {% for post in blogs %}
+            {% include "blog/floppy/post_preview.html" with post=post.specific %}
+        {% endfor %}
+    </div>
+    {% if blogs.has_other_pages %}
+        {% include "blog/floppy/components/pagination.html" with blogs=blogs %}
+    {% endif %}
+{% endblock content %}

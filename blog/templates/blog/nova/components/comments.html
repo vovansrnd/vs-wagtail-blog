@@ -1,0 +1,130 @@
+{% load static wagtailcore_tags blog_tags socialaccount %}
+{% load mptt_comment_tags %}
+{% if not comment %}
+  {# ══════════════════════════════════════════════════════ #}
+  {# Корневой вызов: список комментариев + компактная форма #}
+  {# ══════════════════════════════════════════════════════ #}
+  <div class="comments-wrap">
+    {# ── Список ── #}
+    <section class="comments-list-section" aria-labelledby="comments-heading">
+      <h3 class="comments-heading" id="comments-heading">
+        Комментарии
+        <span class="comments-count" data-count="{{ approved_comments_count|default:0 }}">({{ approved_comments_count|default:0 }})</span>
+      </h3>
+      {% if comment_roots %}
+            <div class="comments-list" role="list">
+            {% for node in comment_roots %}
+                {% include "blog/nova/components/comments.html" with comment=node page=page form=form %}
+            {% endfor %}
+            </div>
+        {% else %}
+        <p class="comments-empty">Пока нет комментариев. Будьте первым!</p>
+      {% endif %}
+    </section>
+    {# ── Компактная форма ── #}
+    {# ── Форма грузится лениво (приватный фрагмент): статья кэшируема ── #}
+    <div class="comment-form-lazy" id="comment-form-anchor"
+         data-comment-form-lazy data-page-id="{{ page.pk }}"
+         data-editor-module="{% if comment_editor_module %}{{ comment_editor_module }}{% endif %}">
+      <button type="button" class="cfl-btn btn-comment-open">Написать комментарий</button>
+      <div class="cfl-body"></div>
+    </div>
+    <script src="{% static "js/comment-form-lazy.js" %}?v=2" defer></script>
+{% else %}
+  {# ══════════════════════════════════════════════════════ #}
+  {# Рекурсивный вызов: один комментарий + ответы           #}
+  {# ══════════════════════════════════════════════════════ #}
+  {% with replies=comment.children.all %}
+  <div class="comment"
+       id="comment-{{ comment.id }}"
+       data-comment-id="{{ comment.id }}"
+       data-level="{{ comment.level }}"
+       style="--level: {{ comment.level }}"
+       itemscope
+       itemtype="https://schema.org/Comment">
+      {# Линия ветки ответов (на десктопе она будет висеть слева) #}
+      {% if replies %}<div class="comment-thread-line" aria-hidden="true"></div>{% endif %}
+      {# Полная карточка комментария #}
+      <div class="comment-card">
+        <header class="comment-header">
+          {# Аватар: на десктопе мы вынесем его CSS-ом влево, а на мобилке он останется тут #}
+          {% if comment.user and comment.get_avatar_url %}
+            <img src="{{ comment.get_avatar_url }}"
+                 alt="{{ comment.display_author_name }}"
+                 class="comment-avatar"
+                 loading="lazy"
+                 width="48"
+                 height="48">
+          {% else %}
+            <span class="comment-avatar comment-avatar--guest" role="img" aria-label="Гость"></span>
+          {% endif %}
+          <div class="comment-meta-info">
+            <div class="comment-author-row">
+              <span class="comment-author" itemprop="author">{{ comment.display_author_name }}</span>
+              {% if comment.user and comment.user.is_staff %}
+                <span class="comment-badge comment-badge--admin" title="Администратор">
+                  <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> админ
+                </span>
+              {% elif comment.user %}
+                <span class="comment-badge comment-badge--member">
+                  <i class="fa-solid fa-circle-check" aria-hidden="true"></i> участник
+                </span>
+              {% else %}
+                <span class="comment-badge comment-badge--guest">гость</span>
+              {% endif %}
+            </div>
+            <a href="#comment-{{ comment.id }}"
+               class="comment-date"
+               title="Постоянная ссылка">
+              <time datetime="{{ comment.date_created|date:'Y-m-d\TH:i:s' }}" itemprop="dateCreated">
+                {{ comment.date_created|date:"d.m.Y H:i" }}
+              </time>
+            </a>
+          </div>
+        </header>
+        <div class="comment-body">
+          <div class="comment-content" itemprop="text">{{ comment.content|clean_comment_html }}</div>
+          {% if comment.response %}
+            <div class="comment-response"
+                 role="complementary"
+                 aria-label="Ответ администратора">
+              <div class="comment-response__header">
+                <i class="fa-solid fa-reply" aria-hidden="true"></i>
+                <strong>Ответ администратора:</strong>
+              </div>
+              <div class="comment-response__body">{{ comment.response|clean_comment_html:"extended" }}</div>
+            </div>
+          {% endif %}
+        </div>
+        <footer class="comment-actions">
+          <label class="comment-quote-label">
+            <input type="checkbox"
+                   id="with_quote_{{ comment.id }}"
+                   class="with-quote-checkbox"
+                   data-comment-id="{{ comment.id }}">
+            <span>С цитированием</span>
+          </label>
+          <a href="#comment-form-anchor"
+             class="comment-reply-btn"
+             data-comment-id="{{ comment.id }}"
+             data-comment-author="{{ comment.display_author_name|escape }}"
+             data-comment-content="{{ comment.content|striptags|truncatewords:30|escape }}"
+             role="button">
+            <i class="fa-solid fa-reply" aria-hidden="true"></i> Ответить
+          </a>
+        </footer>
+      </div>
+      {# Скрытый HTML для цитирования #}
+      <div id="comment-html-{{ comment.id }}" hidden>{{ comment.content|clean_comment_html }}</div>
+    </div>
+    {% if replies %}
+        <div class="comment-replies" role="group" aria-label="Ответы">
+        {% for reply in replies %}
+            {% if reply.is_approved %}
+            {% include "blog/nova/components/comments.html" with comment=reply page=page form=form %}
+            {% endif %}
+        {% endfor %}
+        </div>
+    {% endif %}
+  {% endwith %}
+{% endif %}

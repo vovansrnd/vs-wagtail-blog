@@ -1,0 +1,70 @@
+{% extends "blog/zenway/base.html" %}
+{% load wagtailcore_tags blog_tags static %}
+{% block meta_robots %}
+    {% if blogs.number > 1 %}<meta name="robots" content="noindex,follow">{% endif %}
+{% endblock %}
+{% block title %}
+    {% if page.seo_title %}
+        {{ page.seo_title }}
+    {% else %}
+        {{ page.title }} — Страница {{ blogs.number }}
+    {% endif %}
+{% endblock %}
+{% block extra_head %}
+    <link rel="canonical" href="{{ page.get_full_url }}">
+{% endblock extra_head %}
+{% block content %}
+    {% if page.intro and blogs.number == 1 %}<div class="welcome-block">{{ page.intro|safe }}</div>{% endif %}
+    <header class="page-header">
+        <div class="page-title-block">
+            <h1 class="page-title">{{ page.title }}</h1>
+        </div>
+        <div class="view-controls">
+            <div class="view-switcher" role="group" aria-label="Выбор вида отображения">
+                <button class="view-btn" data-view="list" aria-pressed="false" title="Список">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6"  x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6"  x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg>
+                    <span class="view-btn-label">Список</span>
+                </button>
+                <button class="view-btn active" data-view="grid" aria-pressed="true" title="Сетка">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3"  y="3"  width="7" height="7" />
+                        <rect x="14" y="3"  width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3"  y="14" width="7" height="7" />
+                    </svg>
+                    <span class="view-btn-label">Сетка</span>
+                </button>
+            </div>
+            <div class="view-info">
+                <span class="posts-count">
+                    <i class="fas fa-newspaper" aria-hidden="true"></i>
+                    <strong>{{ blogs.paginator.count|default:0 }}</strong>
+                    <span>{{ blogs.paginator.count|default:0|ru_pluralize:"запись,записи,записей" }}</span>
+                </span>
+            </div>
+        </div>
+    </header>
+    <div class="posts-container posts-grid" id="posts-container" itemscope itemtype="https://schema.org/ItemList">
+        {% for post in blogs %}
+            <article class="post-preview" style="--index: {{ forloop.counter0 }}" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <meta itemprop="position" content="{{ forloop.counter }}">
+                {% include "blog/zenway/post_preview.html" with post=post %}
+            </article>
+        {% endfor %}
+    </div>
+    {% if blogs.has_other_pages %}
+        <nav class="pagination-wrapper" aria-label="Постраничная навигация">
+            {% include "blog/zenway/components/pagination.html" %}
+        </nav>
+    {% endif %}
+{% endblock %}
+{% block extra_js %}
+    <script src="{% static 'js/view_switcher.js' %}"></script>
+{% endblock %}

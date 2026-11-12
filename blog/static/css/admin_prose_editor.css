@@ -1,0 +1,19 @@
+/* Выделение инлайн-кода и блоков кода в админке */
+.ProseMirror code {
+    background: rgba(0, 0, 0, 0.2);
+    color: #e06c75;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ProseMirror pre {
+    background: #1e1e1e !important;
+    color: #98c379 !important;
+    padding: 10px 12px !important;
+    border-radius: 6px !important;
+    font-family: monospace !important;
+    margin: 8px 0 !important;
+}

@@ -1,0 +1,68 @@
+{% extends "blog/zenway/base.html" %}
+
+{# Переопределение базового шаблона форума (wagtail_simple_forum) для zenway.
+   Плагин по умолчанию наследует нейтральный base.html — здесь возвращаем
+   наследование zenway-темы и её цветовое оформление.
+   Старый CSS ядра лежит в blog/static/blog/zenway/css/forum.css и грузится
+   ПОСЛЕ структурного CSS плагина, чтобы переопределять его переменные. #}
+
+   {% load static %}
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'wagtail_simple_forum/css/forum.css' %}">
+    <link rel="stylesheet" href="{% static 'blog/zenway/css/forum.css' %}">
+    <script src="{% static 'wagtail_simple_forum/js/prose_editor_codeblock.js' %}" defer></script>
+{% endblock extra_head %}
+{% block content %}
+    <div class="forum-wrapper">
+        <div class="forum-header page-header">
+            <div class="page-title-block">
+                <h1 class="page-title">
+                    <i class="fa-solid fa-comments" aria-hidden="true"></i>
+                    Форум
+                </h1>
+            </div>
+            <div class="forum-topbar">
+                <nav class="forum-breadcrumbs" aria-label="Хлебные крошки">
+                    <a href="{% url 'wagtail_simple_forum:forum_index' %}">
+                        <i class="fa-solid fa-house-chimney" aria-hidden="true"></i>
+                        Форум
+                    </a>
+                    {% block forum_breadcrumbs %}
+                    {% endblock forum_breadcrumbs %}
+                </nav>
+                <div class="forum-topbar-right">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'wagtail_simple_forum:pm_inbox' %}"
+                           class="forum-btn forum-btn--ghost forum-btn--sm">
+                            <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+                            ЛС
+                        </a>
+                    {% endif %}
+                    <form class="forum-search-form"
+                          action="{% url 'wagtail_simple_forum:forum_search' %}"
+                          method="get"
+                          role="search">
+                        <input type="search"
+                               name="q"
+                               placeholder="Поиск по форуму"
+                               aria-label="Поиск по форуму"
+                               {% if query %}value="{{ query }}"{% endif %}>
+                        <button type="submit" aria-label="Искать">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% if messages %}
+            <div class="forum-messages" role="status" aria-live="polite">
+                {% for message in messages %}<div class="alert alert-{{ message.tags }}">{{ message }}</div>{% endfor %}
+            </div>
+        {% endif %}
+        <div class="forum-content">
+            {% block forum_content %}
+            {% endblock forum_content %}
+        </div>
+    </div>
+{% endblock content %}

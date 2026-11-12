@@ -1,0 +1,349 @@
+{% load static wagtailcore_tags blog_tags wagtailimages_tags socialaccount %}
+{% load wagtailsettings_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>
+            {% block title %}
+                {% if page %}
+                    {{ page.seo_title|default:page.title }}
+                {% else %}
+                    Vs-Svet
+                {% endif %}
+            {% endblock %}
+        </title>
+        {% block meta_description %}{% endblock %}
+        {% if page.seo_keywords %}<meta name="keywords" content="{{ page.seo_keywords }}">{% endif %}
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+        <!-- Мгновенное применение сохраненной палитры без мигания -->
+        <script>
+            (function() {
+                var p = localStorage.getItem('site_palette');
+                if (p && p !== 'default') {
+                    document.documentElement.classList.add('palette-' + p);
+                }
+            })();
+        </script>
+
+        <!-- Стили темы Nova напрямую -->
+        <link rel="stylesheet" href="{% static 'css/nova.css' %}">
+        <link rel="stylesheet" href="{% static 'css/palettes.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+
+        {% if page %}
+            <meta property="og:url" content="{{ page.get_full_url }}">
+            {% block og_title %}
+                <meta property="og:title" content="{{ page.seo_title|default:page.title }}">
+            {% endblock %}
+            {% if page.main_image and page.main_image.file %}
+                {% image page.main_image fill-1200x630 as og_image %}
+                <meta property="og:image" content="{{ og_image.full_url }}">
+            {% endif %}
+            {% if page.excerpt %}
+                <meta property="og:description" content="{{ page.excerpt|striptags }}">
+            {% elif page.search_description %}
+                <meta property="og:description" content="{{ page.search_description }}">
+            {% elif page.intro %}
+                <meta property="og:description" content="{{ page.intro|striptags|truncatewords:25 }}">
+            {% elif page.body %}
+                <meta property="og:description" content="{{ page.body|striptags|truncatewords:25 }}">
+            {% endif %}
+        {% endif %}
+
+        {% block extra_head %}{% endblock extra_head %}
+        {% block extra_css %}{% endblock extra_css %}
+        {% block meta_robots %}{% endblock meta_robots %}
+    </head>
+    <body>
+        <header class="container">
+            <div class="head-title top-bar"></div>
+
+            <a href="/" class="logo-container" aria-label="На главную">
+                <div class="logo-mask"></div>
+            </a>
+
+            {% get_settings as settings %}
+            {% with s=settings.blog.BlogSettings %}
+                {% if s.show_announcement and s.featured_product %}
+                    <div class="announcement-bar">
+                        <div class="ann-wrap">
+                            <span>{{ s.announcement_text }}</span>
+                            <a href="{{ s.featured_product.url }}" class="ann-cta">
+                                {{ s.announcement_cta }}
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="head-title bottom-bar">
+                <nav class="menu-container">
+                    <ul class="menu">
+                        {# Анонимное меню кэшируемо; для сессии меню подменяется приватным фрагментом. #}
+                        {# data-auth-menu стоит на самом пункте «Войти»: personal-bar.js вставит #}
+                        {# авторизованные пункты перед ним и удалит его — замена, а не дополнение #}
+                        {# (раньше «Войти» и «Привет/Выйти» показывались одновременно, Д46). #}
+
+                            <li class="menu-dropdown" data-auth-menu>
+                                <button type="button"
+                                        class="menu-dropdown__trigger"
+                                        aria-expanded="false"
+                                        aria-controls="login-dropdown">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="12" cy="7" r="4"/>
+                                    </svg>
+                                    Войти
+                                    <svg class="menu-dropdown__chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                                        <polyline points="6 9 12 15 18 9"/>
+                                    </svg>
+                                </button>
+
+                                <ul id="login-dropdown" class="menu-dropdown__list">
+                                    <li>
+                                        <a href="{% url 'account_login' %}" class="menu-dropdown__item">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                                <polyline points="10 17 15 12 10 7"/>
+                                                <line x1="15" y1="12" x2="3" y2="12"/>
+                                            </svg>
+                                            Войти с паролем
+                                        </a>
+                                    </li>
+                                    <li class="menu-dropdown__divider"></li>
+                                    <li>
+                                        {% if 'yandex'|social_provider_enabled %}
+                                          <a href="{% provider_login_url 'yandex' %}?next=/" class="menu-dropdown__item menu-dropdown__item--yandex"><i class="fa-brands fa-yandex" aria-hidden="true"></i>
+                                            Войти через Яндекс</a>
+                                        {% endif %}
+                                    </li>
+                                    <li class="menu-dropdown__divider"></li>
+                                    <li>
+                                        <a href="{% url 'account_signup' %}" class="menu-dropdown__item menu-dropdown__item--signup">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                                <circle cx="8.5" cy="7" r="4"/>
+                                                <line x1="20" y1="8" x2="20" y2="14"/>
+                                                <line x1="23" y1="11" x2="17" y2="11"/>
+                                            </svg>
+                                            Регистрация
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        
+<script src="{% static "js/personal-bar.js" %}?v=4" defer></script>
+                        <li>
+                            <a href="/contact/">Контакты</a>
+                        </li>
+                        <li>
+                            <form class="search-form" action="/search/" method="get">
+                                <input type="search" name="query" placeholder="Поиск по блогу" aria-label="Поиск по блогу">
+                                <button type="submit" aria-label="Искать">Искать</button>
+                            </form>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main id="main-content" class="site-main">
+            <div class="container main-wrapper">
+                <div class="content-column">
+                    {% block content %}{% endblock %}
+                </div>
+                <aside class="sidebar-column">
+                    {% with fp=settings.blog.BlogSettings.featured_product %}
+                        {% if fp %}
+                            {% include "blog/nova/components/product_widget.html" with product=fp %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- 1. Рубрики -->
+                    {% get_categories_for_tree as categories_data %}
+                    {% include "blog/nova/components/categories_tree.html" with nodes=categories_data.nodes current_slug=categories_data.current_slug %}
+
+                    <!-- 2. Последние посты -->
+                    {% get_latest_posts 5 as latest_posts_list %}
+                    {% include "blog/nova/components/latest_posts.html" with latest_posts=latest_posts_list %}
+
+                    <!-- 3. Теги: Радиоэлектроника -->
+                    {% get_tags_for_cloud 'tech' as tech_tags_list %}
+                    {% if tech_tags_list %}
+                        {% include "blog/nova/components/tags_cloud.html" with tags=tech_tags_list title="Теги: Радиоэлектроника" %}
+                    {% endif %}
+
+                    <!-- 4. Теги: Личное -->
+                    {% get_tags_for_cloud 'life' as life_tags_list %}
+                    {% if life_tags_list %}
+                        {% include "blog/nova/components/tags_cloud.html" with tags=life_tags_list title="Теги: Личное" %}
+                    {% endif %}
+                    <!-- Переключатель тем -->
+                    {% include "blog/nova/components/themes.html" %}
+                </aside>
+            </div>
+        </main>
+
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-section footer-about">
+                        <h4>О блоге</h4>
+                        <p>
+                            Блог Владимира Тарасова об электронике, DIY-проектах, винтажной аудиотехнике, звуке, ламповых фонокорректорах и усилителях
+                        </p>
+                        <div class="footer-social">
+                            <a href="https://vk.com/radiohobbi_club" title="VKontakte" aria-label="VKontakte" rel="noopener noreferrer" target="_blank">
+                                <i class="fa-brands fa-vk" aria-hidden="true"></i>
+                            </a>
+                            <a href="/feed/" title="RSS Feed" aria-label="RSS Feed">
+                                <i class="fa-solid fa-rss" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-section footer-nav">
+                        <h4>Навигация</h4>
+                        <nav aria-label="Дополнительная навигация">
+                            <ul>
+                                <li><a href="/">Главная</a></li>
+                                <li><a href="/about/">О сайте</a></li>
+                                <li><a href="/contact/">Контакты</a></li>
+                                <li><a href="/archive/">Архив</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="footer-section footer-subscribe">
+                        <h4>Подписка</h4>
+                        <p>Получайте уведомления о новых статьях</p>
+                        <form class="footer-subscribe-form" action="/subscribe/" method="post" data-subscribe-form>
+                            {% comment %}CSRF-кука выдаётся лениво /personal/csrf/ (страницы кэшируются){% endcomment %}
+                            <label for="subscribe-email" class="sr-only">Email для подписки</label>
+                            <input type="email" id="subscribe-email" name="email" placeholder="Ваш email" autocomplete="email" required>
+                            <button type="submit" aria-label="Подписаться">OK</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; {% now "Y" %} Vs-Svet. Все права защищены.</p>
+                </div>
+            </div>
+        </footer>
+
+        <button class="back-to-top" id="backToTopBtn" aria-label="Наверх">↑</button>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const backToTopButton = document.querySelector('.back-to-top');
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset > 500) {
+                        backToTopButton.classList.add('visible');
+                    } else {
+                        backToTopButton.classList.remove('visible');
+                    }
+                });
+                backToTopButton.addEventListener('click', function() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+        </script>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js" onload="hljs.highlightAll()"></script>
+        {% block extra_js %}{% endblock %}
+        <script>
+        (function () {
+            'use strict';
+            function initLoginDropdown() {
+                var dropdowns = document.querySelectorAll('.menu-dropdown');
+                if (!dropdowns.length) return;
+                var overlay = document.getElementById('login-dropdown-overlay');
+                if (!overlay) {
+                    overlay = document.createElement('div');
+                    overlay.id = 'login-dropdown-overlay';
+                    overlay.className = 'menu-dropdown-overlay';
+                    document.body.appendChild(overlay);
+                }
+                function closeAll() {
+                    dropdowns.forEach(function (d) {
+                        d.classList.remove('is-open');
+                        var t = d.querySelector('.menu-dropdown__trigger');
+                        if (t) t.setAttribute('aria-expanded', 'false');
+                    });
+                    overlay.classList.remove('is-active');
+                }
+                dropdowns.forEach(function (dropdown) {
+                    var trigger = dropdown.querySelector('.menu-dropdown__trigger');
+                    if (!trigger) return;
+                    trigger.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        var wasOpen = dropdown.classList.contains('is-open');
+                        closeAll();
+                        if (!wasOpen) {
+                            dropdown.classList.add('is-open');
+                            trigger.setAttribute('aria-expanded', 'true');
+                            overlay.classList.add('is-active');
+                        }
+                    });
+                });
+                overlay.addEventListener('click', closeAll);
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') closeAll();
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initLoginDropdown);
+            } else {
+                initLoginDropdown();
+            }
+        }());
+        </script>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+              var items = document.querySelectorAll('.palette-item[data-palette]');
+              var current = localStorage.getItem('site_palette') || 'default';
+
+              // 1. При загрузке подсвечиваем активный кружок
+              items.forEach(function(item) {
+                  if (item.getAttribute('data-palette') === current) {
+                      item.classList.add('active');
+                  } else {
+                      item.classList.remove('active');
+                  }
+
+                  // 2. Обработка клика
+                  item.addEventListener('click', function(e) {
+                      e.preventDefault();
+                      var pal = this.getAttribute('data-palette');
+
+                      // Снимаем старый класс темы с <html>
+                      var classes = document.documentElement.className.split(' ').filter(function(c) {
+                          return !c.startsWith('palette-');
+                      });
+
+                      // Ставим новый класс
+                      if (pal !== 'default') {
+                          classes.push('palette-' + pal);
+                      }
+                      document.documentElement.className = classes.join(' ');
+
+                      // Сохраняем в localStorage
+                      localStorage.setItem('site_palette', pal);
+
+                      // Переставляем галочку
+                      items.forEach(function(i) { i.classList.remove('active'); });
+                      this.classList.add('active');
+                  });
+              });
+          });
+        </script>
+    </body>
+</html>
+

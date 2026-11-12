@@ -1,0 +1,29 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}Вход через {{ provider.name }}{% endblock %}
+
+{% block inner_content %}
+<div class="auth-form">
+    <h1 class="auth-title">Вход через {{ provider.name }}</h1>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div style="text-align: center; margin-bottom: 2rem; color: var(--text-color, #555);">
+        <p>Вы собираетесь войти на сайт, используя свою учетную запись <strong>{{ provider.name }}</strong>.</p>
+    </div>
+
+    <form method="post" style="text-align: center;">
+        {% csrf_token %}
+        <button type="submit" class="button auth-button" style="margin: 0 auto;">
+            <i class="fas fa-sign-in-alt"></i> Продолжить
+        </button>
+    </form>
+</div>
+{% endblock %}

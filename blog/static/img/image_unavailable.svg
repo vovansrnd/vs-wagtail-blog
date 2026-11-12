@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#2a2a2a" rx="4"/>
+  <rect x="1" y="1" width="398" height="198" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="6,4" rx="4"/>
+  <text x="200" y="90" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#888">
+    Изображение недоступно
+  </text>
+  <text x="200" y="120" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" fill="#555">
+    🖼
+  </text>
+</svg>

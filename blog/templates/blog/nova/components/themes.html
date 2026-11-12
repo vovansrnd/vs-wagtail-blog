@@ -1,0 +1,109 @@
+<style>
+/* 1. Прячем галочку у всех неактивных элементов */
+.palette-item .swatch-check {
+    display: none !important;
+}
+
+/* 2. Показываем галочку ТОЛЬКО у активного элемента */
+.palette-item.active .swatch-check {
+    display: inline-block !important;
+}
+
+/* 3. Добавляем аккуратную рамку каждому кружку, чтобы они не сливались ни со светлым, ни с темным фоном */
+.palette-item .swatch {
+    border: 1px solid rgba(128, 128, 128, 0.4) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+</style>
+
+<div class="widget theme-switcher">
+    <span class="head-s">Цветовая схема</span>
+
+    <!-- ================= СВЕТЛЫЕ ПАЛИТРЫ ================= -->
+    <h4 class="palette-group-title">Светлые</h4>
+    <ul class="palette-list">
+        <li class="palette-item" data-palette="default">
+            <a href="javascript:void(0);" title="По умолчанию" aria-label="По умолчанию">
+                <span class="swatch" style="background: #ffffff;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="warm">
+            <a href="javascript:void(0);" title="Тёплая (Warm)" aria-label="Тёплая">
+                <span class="swatch" style="background: #FB923C;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="canvas">
+            <a href="javascript:void(0);" title="Холст (Canvas)" aria-label="Холст">
+                <span class="swatch" style="background: #e5e5dc;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="graphite">
+            <a href="javascript:void(0);" title="Графит (Graphite)" aria-label="Графит">
+                <span class="swatch" style="background: #4B5563;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="dehancer-light">
+            <a href="javascript:void(0);" title="Dehancer Light" aria-label="Dehancer Light">
+                <span class="swatch" style="background: #E74C3C;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="denim">
+            <a href="javascript:void(0);" title="Деним (Denim Dust)" aria-label="Деним">
+                <span class="swatch" style="background: #60727b;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- ================= ТЁМНЫЕ ПАЛИТРЫ ================= -->
+    <h4 class="palette-group-title">Тёмные</h4>
+    <ul class="palette-list">
+        <li class="palette-item" data-palette="nord-storm">
+            <a href="javascript:void(0);" title="Nord Storm" aria-label="Nord Storm">
+                <span class="swatch" style="background: #5E81AC;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="deep-ocean">
+            <a href="javascript:void(0);" title="Глубокий океан (Deep Ocean)" aria-label="Глубокий океан">
+                <span class="swatch" style="background: #0EA5E9;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="slate-amber">
+            <a href="javascript:void(0);" title="Сланцевый янтарь (Slate & Amber)" aria-label="Сланцевый янтарь">
+                <span class="swatch" style="background: #F59E0B;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="warm-dark">
+            <a href="javascript:void(0);" title="Тёплая тёмная (Warm Dark)" aria-label="Тёплая тёмная">
+                <span class="swatch" style="background: #EA580C;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="monochrome">
+            <a href="javascript:void(0);" title="Монохром (Monochrome)" aria-label="Монохром">
+                <span class="swatch" style="background: #27272A;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="dehancer-dark">
+            <a href="javascript:void(0);" title="Dehancer Dark" aria-label="Dehancer Dark">
+                <span class="swatch" style="background: #FF6B5A;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+        <li class="palette-item" data-palette="arctic-night">
+            <a href="javascript:void(0);" title="Арктика (Arctic Night)" aria-label="Арктика">
+                <span class="swatch" style="background: #06B6D4;"></span>
+                <span class="swatch-check" aria-hidden="true"><i class="fas fa-check"></i></span>
+            </a>
+        </li>
+    </ul>
+</div>

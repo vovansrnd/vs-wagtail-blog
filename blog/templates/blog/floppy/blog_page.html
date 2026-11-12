@@ -1,0 +1,135 @@
+{% extends "blog/floppy/base.html" %}
+{% load mptt_comment_tags %}
+{% load wagtailcore_tags wagtailimages_tags blog_filters static %}
+{% block extra_head %}
+    <link rel="canonical" href="{{ page.get_full_url }}">
+{% endblock extra_head %}
+{% block meta_description %}
+    <meta name="description"
+          content="{{ page.meta_description|truncatewords:25 }}">
+{% endblock meta_description %}
+{% block og_type %}article{% endblock %}
+{% block content %}
+    <div class="mso-type-page">
+        <div class="page_only">
+            <div class="page-info">
+                <span>Опубликовано:</span> {{ page.date_published|date:"d.m.Y" }}
+            </div>
+            <h1>{{ page.title }}</h1>
+            <div class="page_content type_page">
+                {% comment %} {% if page.main_image %}
+                    <div class="post-main-image">
+                        {% image page.main_image max-800x600 as img %}
+                        <img src="{{ img.url }}" alt="{{ page.title }}">
+                    </div>
+                {% endif %} {% endcomment %}
+                <a id="cut"></a>
+                {{ page.body|safe }}
+                {#{ page.body|richtext }#}
+                <div id="rater" title="Оценки будут добавлены позже">
+                    <!-- TODO: Rating system -->
+                </div>
+            </div>
+            <div class="page-info-after">
+                {% if page.tags.exists %}
+                    <span class="post-tags">Теги:
+                        {% for tag in page.tags.all %}
+                            <a href="{% url 'tag_view' tag.slug %}" rel="tag">{{ tag.name }}</a>
+                            {% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    </span>
+                    <br />
+                {% endif %}
+                {% if page.categories.exists %}
+                    <span class="post-categories">Эта запись опубликована в рубрике
+                        {% for cat in page.categories.all %}
+                            <a href="{% url 'category_view' cat.slug %}">{{ cat.name }}</a>
+                            {% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                        .
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        <!-- /div.page_only -->
+        <!-- /div.page_only -->
+
+        <!-- ПОХОЖИЕ ИГРЫ -->
+        {% if similar_posts %}
+            <div class="page_other_pages">
+                <div class="page_other_pages_header">Похожие игры:</div>
+                <ul class="floppy-similar-grid">
+                    {% for post in similar_posts|slice:":5" %}
+                        <li>
+                            <a href="{% pageurl post %}">
+                                {% if post.main_image %}
+                                    {% image post.main_image fill-160x100 as thumb %}
+                                    <img src="{{ thumb.url }}" alt="{{ post.title }}" loading="lazy">
+                                {% else %}
+                                    <div class="floppy-no-thumb">Нет фото</div>
+                                {% endif %}
+                                <span class="floppy-similar-title">{{ post.title }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <!-- СЕКЦИЯ КОММЕНТАРИЕВ -->
+        <div class="mso-type-page-comments">
+            <div class="mso-comments">
+                <p class="mso-comments-count">
+                    <span class="mso-comments-all-count">Комментариев: {{ approved_comments_count|default:0 }}</span>
+                </p>
+                <ul class="comments-list">
+                    {% load mptt_tags %}
+                    {% recursetree comment_tree %}
+                    <li class="comment-item"
+                        style="margin-left: {{ node.level|multiply:20 }}px">
+                        <a id="comment-{{ node.id }}"></a>
+                        <div class="comment-info">
+                            <span class="nick"><b>{{ node.display_author_name }}</b></span>
+                            <div class="comment-date">
+                                <a href="#comment-{{ node.id }}">{{ node.date_created|date:"d.m.Y в H:i" }}</a>
+                            </div>
+                        </div>
+                        <div class="comment-content">
+                            {{ node.content|clean_comment_html }}
+                            {% if node.response %}
+                                <div class="admin-response">
+                                    <b>Ответ админа:</b>
+                                    <br>
+                                    {{ node.response|clean_comment_html:"extended" }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="comment-reply-link">
+                            <a href="#comment-form-anchor"
+                               class="comment-reply-btn"
+                               data-comment-id="{{ node.id }}"
+                               data-comment-author="{{ node.display_author_name|escape }}">Ответить</a>
+                        </div>
+                        <div id="comment-html-{{ node.id }}" hidden>{{ node.content|clean_comment_html }}</div>
+                        {% if not node.is_leaf_node %}
+                            <ul class="comment-children">
+                                {{ children }}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endrecursetree %}
+            </ul>
+        </div>
+        <div class="comment-form-lazy" id="comment-form-anchor"
+             data-comment-form-lazy data-page-id="{{ page.pk }}"
+             data-editor-module="{% if comment_editor_module %}{{ comment_editor_module }}{% endif %}">
+          <button type="button" class="cfl-btn">Написать комментарий!</button>
+          <div class="cfl-body"></div>
+        </div>
+        <script src="{% static "js/comment-form-lazy.js" %}?v=2" defer></script>
+    </div>
+</div>
+{% endblock content %}
+{% block extra_js %}
+    <script src="{% static 'wagtail_mptt_comments/js/comment_handler.js' %}"></script>
+{% endblock %}

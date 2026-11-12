@@ -1,0 +1,513 @@
+/* ===========================================================================
+   PALETTES.CSS - Unified Color Schemes for All Themes
+   ===========================================================================
+
+   Usage:
+   1. Include AFTER theme CSS
+   2. Apply class to <html>: <html class="palette-sky">
+   3. Default palette uses theme's built-in colors
+
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   DEFAULT PALETTE (uses theme's :root)
+   --------------------------------------------------------------------------- */
+:root.palette-default { }
+
+/* ===========================================================================
+   LIGHT PALETTES
+   =========================================================================== */
+
+/* Warm */
+:root.palette-warm {
+  --primary-color:     #FB923C;
+  --primary-dark:      #F97316;
+  --primary-light:     #FFF7ED;
+
+  --background-color:  #FFFBEB;
+  --background-title:  #FED7AA;
+  --surface-color:     #FFFFFF;
+
+  --text-color:        #0f172a;
+  --text-secondary:    #78350F;
+  --heading-color:     #78350F;
+
+  --border-color:      #FED7AA;
+  --hover-background:  #FFF7ED;
+
+  --danger-color:      #DC2626;
+  --danger-background: #FFF1F0;
+  --success-color:     #16A34A;
+
+  --white:             #FFFFFF;
+}
+
+/* Canvas */
+:root.palette-canvas {
+  --primary-color:     #545454; /* Угольный серый */
+  --primary-dark:      #262626;
+  --primary-light:     #f5f5f0;
+  --background-color:  #fbfbf8; /* Светлый кремовый холст */
+  --background-title:  #f2f2eb;
+  --surface-color:     #ffffff;
+  --text-color:        #2d2d2d;
+  --text-secondary:    #737373;
+  --heading-color:     #1a1a1a;
+  --border-color:      #e5e5dc;
+  --hover-background:  #f5f5f0;
+  --danger-color:      #a83232;
+  --danger-background: #fffafa;
+  --success-color:     #3e663e;
+  --white:             #ffffff;
+}
+
+/* Graphite (Графит) — Строгая корпоративная тема.  */
+:root.palette-graphite {
+  --primary-color:     #4B5563; /* Сланец */
+  --primary-dark:      #1F2937; /* Темный графит */
+  --primary-light:     #F3F4F6;
+  --background-color:  #F3F4F6; /* Прохладный серый фон */
+  --background-title:  #E5E7EB;
+  --surface-color:     #FFFFFF; /* Контрастные белые карточки */
+  --text-color:        #374151;
+  --text-secondary:    #6B7280;
+  --heading-color:     #111827;
+  --border-color:      #E5E7EB;
+  --hover-background:  #F9FAFB;
+  --danger-color:      #DC2626;
+  --danger-background: #FEF2F2;
+  --success-color:     #10B981;
+  --white:             #FFFFFF;
+}
+
+/* Dehancer Light */
+:root.palette-dehancer-light {
+  --primary-color:     #E74C3C;
+  --primary-dark:      #C0392B;
+  --primary-light:     #FADBD8;
+
+  --background-color:  #F8F7F5;
+  --background-title:  #E8E6E3;
+  --surface-color:     #FFFFFF;
+
+  --text-color:        #2C2C2C;
+  --text-secondary:    #6B6B6B;
+  --heading-color:     #2C2C2C;
+
+  --border-color:      #E8E6E3;
+  --hover-background:  #F5F4F2;
+
+  --danger-color:      #E74C3C;
+  --danger-background: #FEF5F4;
+  --success-color:     #27AE60;
+
+  --white:             #FFFFFF;
+}
+
+/* Denim Dust (Припыленный деним) */
+:root.palette-denim {
+  --primary-color:     #60727b;
+  --primary-dark:      #455259;
+  --primary-light:     #f0f2f3;
+  --background-color:  #f7f8f9;
+  --background-title:  #e9ecee;
+  --surface-color:     #ffffff;
+  --text-color:        #374146;
+  --text-secondary:    #78868c;
+  --heading-color:     #263238;
+  --border-color:      #d1d8db;
+  --hover-background:  #f0f2f3;
+  --danger-color:      #c62828;
+  --danger-background: #fff5f5;
+  --success-color:     #4d8061;
+  --white:             #ffffff;
+}
+
+:root.palette-old-def {
+    --primary-color:      #0d9488;
+    --primary-dark:       #0f766e;
+    --primary-light:      #f0fdfa;
+
+    --background-color:   #f8fafc;
+    --background-title:   #e2e8f0;
+    --surface-color:      #ffffff;
+    --hover-background:   #f1f5f9;
+
+    --text-color:         #0f172a;
+    --text-secondary:     #64748b;
+    --heading-color:      #0f172a;
+
+    --white:              #ffffff;
+    --border-color:       #e2e8f0;
+    --border-light:       #f1f5f9;
+
+    --danger-color:       #dc2626;
+    --danger-background:  #fef2f2;
+    --success-color:      #16a34a;
+}
+
+
+/* ===========================================================================
+   DARK PALETTES
+   =========================================================================== */
+/* Nord Storm */
+:root.palette-nord-storm {
+  --primary-color:     #81A1C1;
+  --primary-dark:      #5E81AC;
+  --primary-light:     #4C566A;
+  --background-color:  #292E39; 
+  --background-title:  #343B47;
+  --surface-color:     #323945; 
+  --text-color:        #D8DEE9;
+  --text-secondary:    #94A3B8;
+  --heading-color:     #ECEFF4;
+  --border-color:      #434C5E;
+  --hover-background:  #3B4252;
+  --danger-color:      #BF616A;
+  --danger-background: #292E39;
+  --success-color:     #A3BE8C;
+  --white:             #ECEFF4;
+  color-scheme: dark;
+}
+
+/* Deep Ocean */
+:root.palette-deep-ocean {
+  --primary-color:     #38BDF8;
+  --primary-dark:      #0EA5E9;
+  --primary-light:     #164E63;
+
+  --background-color:  #082F49;
+  --background-title:  #164E63; /* Светлее фона для контраста */
+  --surface-color:     #0C4A6E;
+
+  --text-color:        #E0F2FE;
+  --text-secondary:    #7DD3FC;
+  --heading-color:     #F0F9FF;
+
+  --border-color:      #075985;
+  --hover-background:  #164E63;
+
+  --danger-color:      #FCA5A5;
+  --danger-background: #450A0A;
+  --success-color:     #86EFAC;
+
+  --white:             #F0F9FF;
+
+  color-scheme: dark;
+}
+
+/* Slate & Amber */
+:root.palette-slate-amber {
+  --primary-color:     #F59E0B;
+  --primary-dark:      #D97706;
+  --primary-light:     #451A03;
+
+  --background-color:  #111827;
+  --background-title:  #374151; /* Светлее для контраста */
+  --surface-color:     #1F2937;
+
+  --text-color:        #F3F4F6;
+  --text-secondary:    #FCD34D;
+  --heading-color:     #FEF3C7;
+
+  --border-color:      #374151;
+  --hover-background:  #374151;
+
+  --danger-color:      #F87171;
+  --danger-background: #450A0A;
+  --success-color:     #86EFAC;
+
+  --white:             #F9FAFB;
+
+  color-scheme: dark;
+}
+
+/* Warm Dark */
+:root.palette-warm-dark {
+  --primary-color:     #FB923C;
+  --primary-dark:      #F97316;
+  --primary-light:     #451A03;
+
+  --background-color:  #1C1917;
+  --background-title:  #44403C; /* Светлее для контраста */
+  --surface-color:     #292524;
+
+  --text-color:        #FEF3C7;
+  --text-secondary:    #FCD34D;
+  --heading-color:     #FEF3C7;
+
+  --border-color:      #44403C;
+  --hover-background:  #44403C;
+
+  --danger-color:      #FFB4AB;
+  --danger-background: #3A1111;
+  --success-color:     #86EFAC;
+
+  --white:             #FEF3C7;
+
+  color-scheme: dark;
+}
+
+/* Monochrome Dark */
+:root.palette-monochrome {
+  --primary-color:     #60A5FA;
+  --primary-dark:      #3B82F6;
+  --primary-light:     #1E3A8A;
+
+  --background-color:  #09090B;
+  --background-title:  #27272A; /* Светлее для контраста */
+  --surface-color:     #18181B;
+
+  --text-color:        #F8FAFC;
+  --text-secondary:    #94A3B8;
+  --heading-color:     #FFFFFF;
+
+  --border-color:      #27272A;
+  --hover-background:  #27272A;
+
+  --danger-color:      #FCA5A5;
+  --danger-background: #331111;
+  --success-color:     #86EFAC;
+
+  --white:             #F8FAFC;
+
+  color-scheme: dark;
+}
+
+/* Dehancer Dark */
+:root.palette-dehancer-dark {
+  --primary-color:     #FF6B5A;
+  --primary-dark:      #E74C3C;
+  --primary-light:     #3D2524;
+
+  --background-color:  #1A1918;
+  --background-title:  #3A3937; /* Светлее для контраста */
+  --surface-color:     #242322;
+
+  --text-color:        #F5F5F5;
+  --text-secondary:    #B8B5B2;
+  --heading-color:     #FFFFFF;
+
+  --border-color:      #3A3937;
+  --hover-background:  #2D2C2B;
+
+  --danger-color:      #FF6B5A;
+  --danger-background: #2D1F1E;
+  --success-color:     #86EFAC;
+
+  --white:             #F5F5F5;
+
+  color-scheme: dark;
+}
+
+/* Arctic Night */
+:root.palette-arctic-night {
+  --primary-color:     #22D3EE;
+  --primary-dark:      #06B6D4;
+  --primary-light:     #164E63;
+
+  --background-color:  #0F172A;
+  --background-title:  #334155; /* Светлее для контраста */
+  --surface-color:     #1E293B;
+
+  --text-color:        #F1F5F9;
+  --text-secondary:    #94A3B8;
+  --heading-color:     #FFFFFF;
+
+  --border-color:      #334155;
+  --hover-background:  #334155;
+
+  --danger-color:      #F87171;
+  --danger-background: #450A0A;
+  --success-color:     #86EFAC;
+
+  --white:             #F1F5F9;
+
+  color-scheme: dark;
+}
+
+/* ===========================================================================
+   PROSE EDITOR OVERRIDES
+   =========================================================================== */
+
+.prose-editor,
+.prose-editor-dialog {
+  --prose-editor-background:    var(--surface-color) !important;
+  --prose-editor-foreground:    var(--text-color) !important;
+  --prose-editor-border-color:  var(--border-color) !important;
+  --prose-editor-active-color:  var(--primary-color) !important;
+  --prose-editor-disabled-color: var(--text-secondary) !important;
+}
+
+.prose-editor .ProseMirror {
+  background: var(--surface-color) !important;
+  color: var(--text-color) !important;
+}
+
+
+.prose-editor .ProseMirror-focused {
+outline: none !important;
+    border: solid var(--border-color) !important;
+    background: color-mix(in srgb, var(--primary-color) 4%, var(--surface-color)) !important;
+}
+
+.prose-menubar {
+  background: color-mix(in srgb, var(--surface-color) 95%, var(--background-color)) !important;
+  border-color: var(--border-color) !important;
+}
+
+.prose-menubar__button {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.prose-menubar__button:hover:not(.disabled) {
+  background: color-mix(in srgb, var(--primary-color) 15%, transparent) !important;
+  color: var(--primary-color) !important;
+}
+
+.prose-menubar__button.active {
+  background-color: var(--primary-color) !important;
+  color: var(--surface-color) !important;
+}
+
+.prose-menubar__button.disabled:not(.active) {
+  opacity: 0.3 !important;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--text-secondary) !important;
+  opacity: 0.5 !important;
+}
+
+/* ===========================================================================
+   AUTH FORMS OVERRIDES
+   =========================================================================== */
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form textarea,
+.auth-form select {
+  background: var(--surface-color) !important;
+  color: var(--text-color) !important;
+  -webkit-text-fill-color: var(--text-color) !important;
+  border-color: var(--border-color) !important;
+}
+
+.auth-form input:focus,
+.auth-form textarea:focus,
+.auth-form select:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 25%, transparent) !important;
+}
+
+.auth-form input::placeholder,
+.auth-form textarea::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.8;
+}
+
+.auth-form input:-webkit-autofill,
+.auth-form input:-webkit-autofill:hover,
+.auth-form input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-color) !important;
+  box-shadow: 0 0 0 1000px var(--surface-color) inset !important;
+}
+
+/* ===========================================================================
+   SEARCH FORM OVERRIDES
+   =========================================================================== */
+
+.search-form {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0;
+}
+
+.search-form input[type="search"] {
+  background: transparent;
+  color: var(--text-color) !important;
+  -webkit-text-fill-color: var(--text-color) !important;
+  border: none;
+}
+
+.search-form input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.search-form:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.search-form input:-webkit-autofill {
+  -webkit-text-fill-color: var(--text-color) !important;
+  box-shadow: 0 0 0 1000px var(--surface-color) inset !important;
+}
+
+/* ===========================================================================
+   UTILITY CLASSES
+   =========================================================================== */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Фикс для автозаполнения в темных темах */
+:root[class*="deep-ocean"],
+:root[class*="slate-amber"],
+:root[class*="warm-dark"],
+:root[class*="monochrome"],
+:root[class*="dehancer-dark"],
+:root[class*="arctic-night"] {
+    /* Фикс автозаполнения */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill {
+        -webkit-text-fill-color: var(--text-color) !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--surface-color) inset !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    /* Фикс для code blocks в темных темах */
+    .post-content pre {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.logo-mask {
+    width: 350px;
+    height: 80px; /* Подбери свою высоту */
+    
+    /* Цвет берем из переменной темы. Если ее нет - будет черный (для светлых) 
+       или белый (для темных), это нужно задать в root */
+    background-color: var(--primary-color, currentColor); 
+    
+    /* Маска "вырезает" форму логотипа из фона */
+    -webkit-mask-image: url('/media/images/vs-svet.png');
+    mask-image: url('/media/images/vs-svet.png');
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: left center;
+    mask-position: left center;
+}
+
+.vk-post-embed {
+    margin: 1rem 0;
+    overflow-x: auto;
+}

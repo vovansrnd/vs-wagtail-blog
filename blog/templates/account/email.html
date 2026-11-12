@@ -1,0 +1,114 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}Управление email адресами{% endblock %}
+
+{% block inner_content %}
+<div class="auth-form email-management">
+    <h1 class="auth-title">Управление email адресами</h1>
+    
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    
+    {% if user.emailaddress_set.all %}
+        <div class="email-list">
+            <h3>Ваши email адреса:</h3>
+            
+            <form method="post" action="{% url 'account_email' %}">
+                {% csrf_token %}
+                
+                {% for emailaddress in user.emailaddress_set.all %}
+                    <div class="email-item">
+                        <div class="email-info">
+                            <input type="radio" 
+                                   name="email" 
+                                   value="{{ emailaddress.email }}"
+                                   id="email_{{ forloop.counter }}"
+                                   {% if emailaddress.primary %}checked{% endif %}>
+                            
+                            <label for="email_{{ forloop.counter }}">
+                                {{ emailaddress.email }}
+                                
+                                {% if emailaddress.primary %}
+                                    <span class="badge primary">Основной</span>
+                                {% endif %}
+                                
+                                {% if emailaddress.verified %}
+                                    <span class="badge verified">
+                                        <i class="fas fa-check-circle"></i> Подтверждён
+                                    </span>
+                                {% else %}
+                                    <span class="badge unverified">
+                                        <i class="fas fa-exclamation-circle"></i> Не подтверждён
+                                    </span>
+                                {% endif %}
+                            </label>
+                        </div>
+                        
+                        <div class="email-actions">
+                            {% if not emailaddress.primary %}
+                                <button type="submit" name="action_primary" value="{{ emailaddress.email }}" 
+                                        class="btn-small btn-primary">
+                                    Сделать основным
+                                </button>
+                            {% endif %}
+                            
+                            {% if not emailaddress.verified %}
+                                <button type="submit" name="action_send" value="{{ emailaddress.email }}" 
+                                        class="btn-small btn-verify">
+                                    Отправить подтверждение
+                                </button>
+                            {% endif %}
+                            
+                            {% if emailaddress.primary %}
+                                {% if user.emailaddress_set.count > 1 %}
+                                    <button type="submit" name="action_remove" value="{{ emailaddress.email }}" 
+                                            class="btn-small btn-danger">
+                                        Удалить
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <button type="submit" name="action_remove" value="{{ emailaddress.email }}" 
+                                        class="btn-small btn-danger">
+                                    Удалить
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </form>
+        </div>
+    {% endif %}
+    
+    <div class="add-email-section">
+        <h3>Добавить email адрес:</h3>
+        
+        <form method="post" action="{% url 'account_email' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">
+                    <i class="fas fa-plus-circle"></i> Новый email
+                </label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <span class="error-text">{{ form.email.errors.0 }}</span>
+                {% endif %}
+            </div>
+            
+            <button type="submit" name="action_add" class="button auth-button">
+                <i class="fas fa-plus"></i> Добавить email
+            </button>
+        </form>
+    </div>
+    
+    <div class="auth-footer">
+        <a href="/" class="back-link">← Вернуться на главную</a>
+    </div>
+</div>
+{% endblock %}

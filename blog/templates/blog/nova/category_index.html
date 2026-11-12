@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags blog_tags %}
+{% block title %}Рубрика: {{ category.name }} | Vs-Svet{% endblock title %}
+{% block content %}
+    <header class="page-header">
+        <div class="page-title-block">
+            <h1 class="page-title">Рубрика: "{{ category.name }}"</h1>
+        </div>
+        <div class="view-controls" style="justify-content: flex-end;">
+            <div class="view-info">
+                <span class="posts-count">
+                    <i class="fas fa-newspaper" aria-hidden="true"></i>
+                    <strong>{{ posts.paginator.count|default:0 }}</strong>
+                    <span>{{ posts.paginator.count|ru_pluralize:"запись,записи,записей" }}</span>
+                </span>
+            </div>
+        </div>
+    </header>
+    {% if posts %}
+        <div class="posts-container posts-list" id="posts-container">
+            {% for post in posts %}
+                <article class="post-preview" style="--index: {{ forloop.counter0 }};">
+                    {% include "blog/nova/post_preview.html" with post=post.specific %}
+                </article>
+            {% endfor %}
+        </div>
+        {% if posts.has_other_pages %}
+            <nav class="pagination-wrapper" role="navigation" aria-label="Постраничная навигация">
+                {% include "blog/nova/components/pagination.html" with blogs=posts %}
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info">
+            <p class="no-posts" style="margin-bottom: 0;">В этой рубрике пока нет опубликованных статей.</p>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}Выход из системы{% endblock %}
+
+{% block inner_content %}
+<div class="auth-form">
+    <h1 class="auth-title">Выход из системы</h1>
+    
+    <div class="logout-message">
+        <i class="fas fa-sign-out-alt"></i>
+        <p>Вы уверены, что хотите выйти?</p>
+    </div>
+
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+        {% endif %}
+        
+        <div class="logout-actions">
+            <button type="submit" class="button auth-button logout-confirm">
+                <i class="fas fa-check"></i> Да, выйти
+            </button>
+            
+            <a href="/" class="button auth-button logout-cancel">
+                <i class="fas fa-times"></i> Отмена
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

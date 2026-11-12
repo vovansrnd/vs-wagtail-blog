@@ -1,0 +1,14 @@
+{% load blog_tags %}
+{% for child in nodes %}
+    <li class="{% if child.slug == current_slug %}active{% endif %}">
+        {% url 'category_view' child.slug as category_url %}
+        <a href="{{ category_url }}">
+            {{ child.name }} {% if child.num_posts %}({{ child.num_posts }}){% endif %}
+        </a>
+        {% if not child.is_leaf_node %}
+            <ul class="children">
+                {% include "blog/nova/components/categories_tree_level.html" with nodes=child.get_children current_slug=current_slug %}
+            </ul>
+        {% endif %}
+    </li>
+{% endfor %}

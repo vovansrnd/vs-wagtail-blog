@@ -1,0 +1,30 @@
+{% load wagtailimages_tags wagtailadmin_tags %}
+
+<div class="image-item" data-id="{{ image.id }}"> {# Используем data-id #}
+    <input type="checkbox" class="image-checkbox" data-id="{{ image.id }}">
+
+    <div class="image-thumb">
+        <a href="{% url 'wagtailimages:edit' image.id %}">
+            {% if image.file %}
+                <img src="{{ image.file.url }}" alt="{{ image.title }}" loading="lazy">
+            {% else %}
+                <div class="no-image"><span>Файл отсутствует</span></div>
+            {% endif %}
+        </a>
+    </div>
+
+    <div class="image-info">
+        <h3 title="{{ image.title }}"><a href="{% url 'wagtailimages:edit' image.id %}">{{ image.title|truncatechars:35 }}</a></h3>
+        <div class="image-meta">
+            <div class="image-meta-row">
+                <span>{{ image.width }}×{{ image.height }}</span>
+                <span>{{ image.get_file_size|filesizeformat }}</span>
+            </div>
+            <div class="image-meta-row"><span>{{ image.created_at|date:"d.m.Y H:i" }}</span></div>
+        </div>
+        <div class="image-actions">
+            <a href="{% url 'wagtailimages:edit' image.id %}" class="button button-small button-secondary icon icon-edit">Изменить</a>
+            <button type="button" class="button button-small no icon icon-bin delete-single" data-id="{{ image.id }}">Удалить</button>
+        </div>
+    </div>
+</div>

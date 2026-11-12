@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags blog_tags static %}
+
+{% block title %}
+    {{ page.seo_title|default:page.title }} - {{ page.categories.first.name|default:"Статья" }} | Vs-Svet
+{% endblock title %}
+
+{% block meta_description %}
+    <meta name="description"
+          content="{{ page.meta_description|truncatewords:25 }}">
+{% endblock meta_description %}
+
+{% block extra_head %}
+    {{ comment_form_media }}
+    {{ block.super }}
+
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Главная",
+      "item": "{{ request.scheme|escapejs }}://{{ request.get_host|escapejs }}/"
+    }{% for cat in breadcrumbs %},
+    {
+      "@type": "ListItem",
+      "position": {{ forloop.counter|add:1 }},
+      "name": "{{ cat.name|escapejs }}",
+      "item": "{{ request.scheme|escapejs }}://{{ request.get_host|escapejs }}{% url 'category_view' cat.slug %}"
+    }{% endfor %},
+    {
+      "@type": "ListItem",
+      "position": {{ breadcrumbs|length|add:2 }},
+      "name": "{{ page.title|escapejs }}",
+      "item": "{{ page.get_full_url|escapejs }}"
+    }
+  ]
+}
+    </script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "{{ page.title|striptags|escapejs }}",
+      "author": {
+        "@type": "Person",
+        "name": "Владимир Тарасов"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Vs-Svet",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "{{ request.scheme|escapejs }}://{{ request.get_host|escapejs }}{% static 'img/vs-svet.png' %}"
+        }
+      },
+      "datePublished": "{{ page.date_published|date:'c' }}",
+      "dateModified": "{{ page.latest_revision_created_at|default:page.date_published|date:'c' }}",
+      {% if page.main_image %}
+          {% image page.main_image fill-1200x630 as og_img %}
+      "image": "{{ request.scheme|escapejs }}://{{ request.get_host|escapejs }}{{ og_img.url|escapejs }}",
+      {% endif %}
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ page.get_full_url|escapejs }}"
+      },
+      "articleBody": "{{ page.body|striptags|truncatewords:50|escapejs }}"
+    }
+    </script>
+
+    <link rel="canonical" href="{{ page.get_full_url }}">
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed/">
+    <meta property="article:author" content="Владимир Тарасов (Vs-Svet)">
+    <meta property="article:published_time" content="{{ page.date_published|date:'c' }}">
+    {% if page.latest_revision_created_at %}
+        <meta property="article:modified_time"
+              content="{{ page.latest_revision_created_at|date:'c' }}">
+    {% endif %}
+    {% for tag in page.tags.all %}
+        <meta property="article:tag" content="{{ tag.name }}">
+    {% endfor %}
+{% endblock extra_head %}
+
+{% block og_type %}article{% endblock og_type %}
+
+{% block content %}
+<article itemscope
+         itemtype="https://schema.org/BlogPosting"
+         data-post-id="{{ page.id }}">
+
+    <meta itemprop="author" content="Владимир Тарасов">
+    <meta itemprop="publisher" content="Vs-Svet">
+    <meta itemprop="datePublished" content="{{ page.date_published|date:'c' }}">
+    {% if page.latest_revision_created_at %}
+        <meta itemprop="dateModified" content="{{ page.latest_revision_created_at|date:'c' }}">
+    {% endif %}
+
+    <header class="post-header post-header-local">
+        <div class="post-title-block">
+            <h1 class="post-title">{{ page.title }}</h1>
+        </div>
+
+        {% if breadcrumbs %}
+            <nav class="post-breadcrumbs" aria-label="Хлебные крошки">
+                <a href="/">Главная</a>
+                {% for cat in breadcrumbs %}
+                    <span aria-hidden="true">›</span>
+                    <a href="{% url 'category_view' cat.slug %}">{{ cat.name }}</a>
+                {% endfor %}
+            </nav>
+        {% endif %}
+
+        <div class="post-meta" role="group" aria-label="Информация о статье">
+
+            {# ── Группа: дата + дата редакции ── #}
+            <div class="meta-item-group">
+                <span class="meta-item" title="Дата публикации">
+                    <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                    <time datetime="{{ page.date_published|date:'c' }}">
+                        {{ page.date_published|date:"d.m.Y" }}
+                    </time>
+                </span>
+
+                {% if page.latest_revision_created_at and page.latest_revision_created_at.date > page.date_published.date %}
+                    <span class="meta-item meta-item--updated" title="Последнее обновление">
+                        <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                        (ред. <time datetime="{{ page.latest_revision_created_at|date:'Y-m-d\TH:i:s' }}">
+                            {{ page.latest_revision_created_at|date:"d.m.Y" }}
+                        </time>)
+                    </span>
+                {% endif %}
+            </div>{# /meta-item-group #}
+
+            {# ── Теги ── #}
+            {% if page.tags.all %}
+                <span class="meta-item--tags">
+                    <i class="fa-solid fa-tags" aria-hidden="true"></i>
+                    {% for tag in page.tags.all %}
+                        {% url 'tag_view' tag.slug as tag_url %}
+                        <a href="{{ tag_url }}" rel="tag">{{ tag.name }}</a>
+                    {% endfor %}
+                </span>
+            {% endif %}
+
+            {# ── Кнопка правки (только для администраторов) ── #}
+            <div class="article-admin-bar-slot" data-admin-bar data-page-id="{{ page.pk }}" hidden></div>
+
+        </div>{# /post-meta #}
+    </header>
+
+    <div class="post-content-container blog-post">
+        {% if page.main_image %}
+            <figure class="post-main-image">
+                {% image page.main_image width-600 as img %}
+                <img src="{{ img.url }}"
+                     alt="{{ img.alt|default:page.title }}"
+                     itemprop="image"
+                     loading="eager">
+            </figure>
+        {% endif %}
+        <div class="post-content" itemprop="articleBody">
+            {#{ page.body|optimize_content_images|safe }#}
+            {{ page.body|optimize_content_images|safe }}
+        </div>
+    </div>
+
+    <footer class="post-footer">
+        <div class="container-narrow">
+            <div class="post-actions-grid">
+                <div class="post-share"
+                     role="group"
+                     aria-label="Поделиться в социальных сетях">
+                    <span class="share-label">Поделиться:</span>
+                    <div class="share-buttons">
+                        <a href="https://vk.com/share.php?url={{ request.build_absolute_uri|urlencode }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           title="Поделиться в VK"
+                           class="share-btn"
+                           data-social="vk">
+                            <i class="fa-brands fa-vk" aria-hidden="true"></i>
+                            <span class="sr-only">VKontakte</span>
+                        </a>
+                        <a href="https://t.me/share/url?url={{ request.build_absolute_uri|urlencode }}&text={{ page.title|urlencode }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           title="Поделиться в Telegram"
+                           class="share-btn"
+                           data-social="telegram">
+                            <i class="fa-brands fa-telegram" aria-hidden="true"></i>
+                            <span class="sr-only">Telegram</span>
+                        </a>
+                        <a href="https://wa.me/?text={{ page.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           title="Поделиться в WhatsApp"
+                           class="share-btn"
+                           data-social="whatsapp">
+                            <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
+                            <span class="sr-only">WhatsApp</span>
+                        </a>
+                        <button class="share-btn copy-url-btn"
+                                data-url="{{ request.build_absolute_uri }}"
+                                title="Копировать ссылку"
+                                data-action="copy-url">
+                            <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                            <span class="sr-only">Копировать ссылку</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="post-author">
+                    Автор: <strong itemprop="author">Владимир Тарасов</strong>
+                </div>
+            </div>
+
+            {% with prev=page.get_prev_post next=page.get_next_post %}
+                {% if prev or next %}
+                    <nav class="post-navigation" aria-label="Навигация по статьям">
+                        {% if prev %}
+                            <a href="{% pageurl prev %}" class="nav-item nav-prev" rel="prev">
+                                <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                                <div class="nav-item-text">
+                                    <span>Предыдущая</span>
+                                    <strong>{{ prev.title }}</strong>
+                                </div>
+                            </a>
+                        {% endif %}
+                        {% if next %}
+                            <a href="{% pageurl next %}" class="nav-item nav-next" rel="next">
+                                <div class="nav-item-text">
+                                    <span>Следующая</span>
+                                    <strong>{{ next.title }}</strong>
+                                </div>
+                                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                            </a>
+                        {% endif %}
+                    </nav>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </footer>
+
+    {% if similar_posts %}
+        <section class="similar-posts-section" aria-labelledby="similar-posts-title">
+            <div class="container">
+                <h2 id="similar-posts-title" class="section-title">Похожие статьи</h2>
+                <div class="similar-posts-grid">
+                    {% for post in similar_posts %}
+                        <a href="{% pageurl post %}"
+                           class="similar-post-card"
+                           data-post-id="{{ post.id }}">
+                            {% if post.main_image %}
+                                {% image post.main_image fill-400x250 as thumb %}
+                                <div class="similar-post-image"
+                                     style="background-image: url('{{ thumb.url }}')"
+                                     role="img"
+                                     aria-label="{{ post.title }}"></div>
+                            {% else %}
+                                <div class="similar-post-image similar-post-image--placeholder"
+                                     aria-hidden="true"></div>
+                            {% endif %}
+                            <div class="similar-post-content">
+                                <h3>{{ post.title }}</h3>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <div class="comments-section" id="comment-section">
+        <div class="container">
+            {% include "blog/nova/components/comments.html" with page=page form=form comment_roots=comment_roots %}
+        </div>
+    </div>
+</article>
+{% endblock content %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/baguetteBox.min.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/baguetteBox.min.js' %}"></script>
+    <script src="{% static 'wagtail_mptt_comments/js/comment_handler.js' %}"></script>
+    <script src="{% static 'js/prose_editor_codeblock.js' %}"></script>
+    <script src="{% static 'js/auto_image_link.js' %}"></script>
+    <script src="{% static 'js/share_copy.js' %}"></script>
+{% endblock extra_js %}

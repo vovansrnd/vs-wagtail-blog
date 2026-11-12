@@ -1,0 +1,16 @@
+{% load wagtailcore_tags %}
+{% if howto_posts %}
+    <div class="widget latest-posts latest-howtos">
+        <h3 class="widget-title">
+            <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+            Дополнительные материалы
+        </h3>
+        <ul>
+            {% for post in howto_posts %}
+                <li>
+                    <a href="{% pageurl post %}" title="{{ post.title }}">{{ post.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

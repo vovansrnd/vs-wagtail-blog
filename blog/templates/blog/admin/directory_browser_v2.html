@@ -1,0 +1,286 @@
+{# blog/templates/blog/admin/directory_browser.html #}
+{% extends "wagtailadmin/base.html" %}
+{% load static wagtailimages_tags wagtailadmin_tags %}
+
+{% block titletag %}Навигатор изображений{% endblock %}
+{% block extra_css %}{{ block.super }}
+<style>
+    /* Основной контейнер */
+    .directory-browser {
+        padding: 0;
+    }
+
+    /* Статистика вверху */
+    .stats-header {
+        background: linear-gradient(135deg, var(--w-color-primary-200) 0%, var(--w-color-secondary-100) 100%);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-radius: 8px;
+        color: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Год-секция */
+    .year-section {
+        margin-bottom: 2rem;
+        background: var(--w-surface-menus);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .year-header {
+        background: var(--w-color-grey-600);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 2px solid var(--w-color-border-furniture);
+    }
+
+    .year-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--w-color-text-context);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .year-meta {
+        display: flex;
+        gap: 1.5rem;
+        color: var(--w-color-text-meta);
+        font-size: 0.875rem;
+    }
+
+    /* Grid директорий */
+    .directories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    /* Карточка директории */
+    .directory-card {
+        background: var(--w-surface-page);
+        border: 2px solid var(--w-color-border-furniture);
+        border-radius: 6px;
+        overflow: hidden;
+        transition: all 0.2s ease;
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .directory-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: var(--w-color-secondary-100);
+    }
+
+    /* Превью директории */
+    .directory-preview {
+        height: 160px;
+        background: var(--w-color-grey-600);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .directory-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .no-preview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--w-color-text-meta);
+        opacity: 0.5;
+    }
+
+    .no-preview .icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    /* Инфо директории */
+    .directory-info {
+        padding: 1rem;
+    }
+
+    .directory-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--w-color-text-context);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .directory-name .icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    .directory-stats {
+        display: flex;
+        justify-content: space-between;
+        color: var(--w-color-text-meta);
+        font-size: 0.8125rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .directory-page {
+        font-size: 0.75rem;
+        color: var(--w-color-secondary-100);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Badge для количества */
+    .count-badge {
+        background: var(--w-color-primary-200);
+        color: white;
+        padding: 0.125rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Форматирование размера файлов */
+    .file-size {
+        font-family: monospace;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .directories-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+
+    /* Светлая тема */
+    [data-theme="light"] .year-header {
+        background: var(--w-color-grey-100);
+    }
+
+    [data-theme="light"] .directory-preview {
+        background: var(--w-color-grey-200);
+    }
+
+    [data-theme="light"] .directory-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="merged">
+    <div class="row nice-padding">
+        <div class="left col9"><h1 class="icon icon-folder-open-inverse">Навигатор изображений</h1></div>
+        <div class="right col3"><a href="{% url 'wagtailimages:add' %}" class="button button-secondary icon icon-image">Добавить изображение</a></div>
+    </div>
+</header>
+
+<div class="nice-padding directory-browser">
+    <div class="stats-header">
+        <h2>Общая статистика</h2>
+        <div class="stats-grid">
+            <div class="stat-item"><div class="stat-number">{{ total_images|default:"0" }}</div><div class="stat-label">Изображений</div></div>
+            <div class="stat-item"><div class="stat-number">{{ total_years|default:"0" }}</div><div class="stat-label">Лет</div></div>
+            <div class="stat-item"><div class="stat-number">{{ total_directories|default:"0" }}</div><div class="stat-label">Директорий</div></div>
+        </div>
+    </div>
+
+    {% for year, year_data in directory_tree %}
+    <div class="year-section">
+        <div class="year-header">
+            <h3 class="year-title">
+                {# ИСПОЛЬЗУЕМ ТЕГ ICON, ОН САМ ПОДСТРОИТСЯ #}
+                {% icon name="date" %}
+                {{ year }}
+            </h3>
+            <div class="year-meta">
+                <span>Изображений: <strong>{{ year_data.total }}</strong></span>
+                <span class="file-size">Размер: <strong>{{ year_data.total_size|filesizeformat }}</strong></span>
+            </div>
+        </div>
+
+        <div class="directories-grid">
+            {% for dir in year_data.dirs %}
+            <a href="{% url 'blog_admin:admin_filtered_images' %}?year={{ year }}&slug={{ dir.slug }}" class="directory-card">
+                <div class="directory-preview">
+                    {# ИСПРАВЛЕНА ЛОГИКА ТЕГА IMAGE #}
+                    {% with image_to_show=dir.preview_image|default:dir.sample %}
+                        {% if image_to_show %}
+                            {% image image_to_show fill-280x160 as thumb %}
+                            <img src="{{ thumb.url }}" alt="{{ dir.display_slug }}">
+                        {% else %}
+                            <div class="no-preview">{% icon name="folder-open-inverse" %}</div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <div class="directory-info">
+                    <div class="directory-name">
+                        {% icon name="folder" %}
+                        <span>{{ dir.display_slug }}</span>
+                        <span class="count-badge">{{ dir.count }}</span>
+                    </div>
+
+                    <div class="directory-stats">
+                        <span>{{ dir.total_size|filesizeformat }}</span>
+                        <span>{{ dir.last_modified|date:"d.m.Y" }}</span>
+                    </div>
+
+                    {% if dir.page_title %}
+                    <div class="directory-page" title="{{ dir.page_title }}">
+                        📄 {{ dir.page_title }}
+                    </div>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="help-block help-info icon icon-help"><p>Изображения пока не загружены.</p></div>
+    {% endfor %}
+</div>
+{% endblock %}

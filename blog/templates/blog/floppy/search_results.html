@@ -1,0 +1,41 @@
+{% extends "blog/floppy/base.html" %}
+{% load wagtailcore_tags blog_tags %}
+{% block title %}
+    Поиск{% if search_query %}: {{ search_query }}{% endif %} - Floppy games
+{% endblock title %}
+{% block content %}
+    <div class="mso-type-page">
+        <div class="page_only">
+            <h1>Поиск{% if search_query %}: "{{ search_query }}"{% endif %}</h1>
+        </div>
+    </div>
+    <div class="mso-type_home home_full">
+        {% if search_query %}
+            {% if search_results %}
+                <div class="page_only" style="margin-bottom: 20px;">
+                    <div class="page-info">
+                        Найдено записей: <strong>{{ search_results.paginator.count }}</strong>
+                    </div>
+                </div>
+                {% for result in search_results %}
+                    {% include "blog/floppy/post_preview.html" with post=result.specific %}
+                {% endfor %}
+                {% if search_results.has_other_pages %}
+                    {% include "blog/floppy/components/pagination.html" with blogs=search_results %}
+                {% endif %}
+            {% else %}
+                <div class="page_only">
+                    <div class="page_content">
+                        <p>По вашему запросу ничего не найдено.</p>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="page_only">
+                <div class="page_content">
+                    <p>Пожалуйста, введите поисковый запрос.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}

@@ -1,0 +1,40 @@
+{% extends "blog/floppy/base.html" %}
+{% load wagtailcore_tags %}
+{% block title %}
+    {{ page.title }} - Floppy games
+{% endblock title %}
+{% block content %}
+    <div class="mso-type-page">
+        <div class="page_only">
+            <h1>{{ page.title }}</h1>
+            <div class="page_content type_page">
+                {{ page.intro|richtext }}
+                <div class="mso-comment-form">
+                    <form class="mso-form" action="" method="POST">
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        <div style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;" aria-hidden="true">
+                            {{ form.company_website }}
+                        </div>
+                        {{ form.form_token }}
+                        <div class="mso-comments-auth">
+                            {% for field in form %}
+                                {% if field.name != "company_website" and field.name != "form_token" %}
+                                    <p>
+                                        {{ field.label_tag }}
+                                        <br>
+                                        {{ field }}
+                                        {% if field.errors %}<span style="color:red; font-size:12px;">{{ field.errors.0 }}</span>{% endif %}
+                                    </p>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="mar10-tb">
+                            <button class="button" type="submit">Отправить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

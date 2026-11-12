@@ -1,0 +1,15 @@
+{% load wagtailimages_tags static %}
+{% with p=product.specific %}
+<aside class="promo-card">
+  <div class="promo-media">
+    {% if image %}{% image image fill-600x300 class="img" alt=p.title %}
+    {% elif p.hero_image %}{% image p.hero_image fill-600x300 class="img" alt=p.title %}
+    {% else %}<img src="{% static 'img/product-card-placeholder.jpg' %}" class="img" alt="">{% endif %}
+  </div>
+  <div class="promo-body">
+    <div class="promo-title">{{ title|default:p.title }}</div>
+    {% if text %}<div class="promo-text">{{ text }}</div>{% endif %}
+    <div class="promo-cta"><a href="{{ p.url }}" class="button-small">{{ cta_text|default:"Подробнее" }}</a></div>
+  </div>
+</aside>
+{% endwith %}

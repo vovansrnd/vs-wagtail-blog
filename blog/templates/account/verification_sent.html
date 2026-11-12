@@ -1,0 +1,33 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}Подтвердите ваш email{% endblock %}
+
+{% block inner_content %}
+<div class="auth-form">
+    <div class="success-icon">
+        <i class="fas fa-envelope"></i>
+    </div>
+    
+    <h1 class="auth-title">Подтвердите ваш email адрес</h1>
+    
+    <div class="success-message">
+        <p>Мы отправили письмо с подтверждением на ваш email адрес.</p>
+        <p>Пожалуйста, перейдите по ссылке в письме для завершения регистрации.</p>
+        
+        <div class="email-note">
+            <i class="fas fa-info-circle"></i>
+            <small>
+                Если вы не получили письмо в течение нескольких минут, 
+                проверьте папку "Спам" или "Нежелательная почта".
+            </small>
+        </div>
+    </div>
+    
+    <div class="auth-footer">
+        <a href="{% url 'account_login' %}" class="button auth-button secondary">
+            Вернуться к входу
+        </a>
+    </div>
+</div>
+{% endblock %}

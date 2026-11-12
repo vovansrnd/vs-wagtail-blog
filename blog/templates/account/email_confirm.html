@@ -1,0 +1,38 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}Подтверждение email{% endblock %}
+
+{% block inner_content %}
+<div class="auth-form">
+    <h1 class="auth-title">Подтверждение email адреса</h1>
+    
+    {% if confirmation %}
+        <p class="auth-description">
+            Пожалуйста, подтвердите, что адрес <strong>{{ confirmation.email_address.email }}</strong> 
+            принадлежит пользователю {{ confirmation.email_address.user }}.
+        </p>
+        
+        <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+            {% csrf_token %}
+            <button type="submit" class="button auth-button">
+                <i class="fas fa-check"></i> Подтвердить
+            </button>
+        </form>
+    {% else %}
+        <div class="error-state">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            
+            <div class="error-description">
+                <p>Ссылка для подтверждения email недействительна или устарела.</p>
+            </div>
+            
+            <a href="{% url 'account_email' %}" class="button auth-button">
+                Управление email адресами
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

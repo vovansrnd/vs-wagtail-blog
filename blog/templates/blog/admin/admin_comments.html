@@ -1,0 +1,147 @@
+{% extends "wagtailadmin/base.html" %}
+{% load static mptt_tags blog_filters %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/admin_comments.css' %}">
+{% endblock %}
+{% block content %}
+    <header class="w-header">
+        <h1 class="w-header__title">
+            Комментарии
+            <span class="status-tag status-tag--info">Всего: {{ total_comments }}</span>
+            <a href="?status=unapproved" class="status-tag status-tag--warning">Новые: ({{ unapproved_count }})</a>
+        </h1>
+        <div class="w-header__controls">
+            <div class="view-controls">
+                <a href="?view=list{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                   class="button {% if view_type == 'list' %}button-active{% endif %}">Список</a>
+                <a href="?view=tree{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                   class="button {% if view_type == 'tree' %}button-active{% endif %}">Дерево</a>
+            </div>
+            <div class="sort-controls">
+                <span>Сортировка:</span>
+                <a href="?view={{ view_type }}&sort=-date_created{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                   class="button {% if sort_by == '-date_created' %}button-active{% endif %}">По дате</a>
+                <a href="?view={{ view_type }}&sort=author{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                   class="button {% if sort_by == 'author' %}button-active{% endif %}">По автору</a>
+                <span>Фильтр:</span>
+                <a href="?view={{ view_type }}&sort={{ sort_by }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                   class="button {% if status_filter == 'all' %}button-active{% endif %}">Все</a>
+                <a href="?view={{ view_type }}&sort={{ sort_by }}&status=unapproved{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+                   class="button {% if status_filter == 'unapproved' %}button-active{% endif %}">
+                    Неодобренные ({{ unapproved_count }})
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="comment-actions">
+        <button id="bulk-approve" class="button button-secondary">Одобрить выбранные</button>
+        <button id="bulk-delete" class="button button-secondary">Удалить выбранные</button>
+    </div>
+    {% if view_type == 'tree' %}
+        <div class="comment-panel-container">
+            <div class="comment-tree">
+                {# Проверка на наличие root_comments #}
+                {#            {% if root_comments %}#}
+                {# Временно отключите with для теста #}
+                {# {% with cached_comments=get_cached_trees root_comments %} #}
+                {% recursetree comment_queryset %}  {# Замените на cached_comments, если with включён #}
+                <div class="comment-node"
+                     style="margin-left: {{ node.level|add:"-1"|multiply:8 }}px">
+                    <div class="comment-header">
+                        <input type="checkbox" class="select-comment" value="{{ node.id }}">
+                        <span class="comment-author">{{ node.display_author_name }}</span>
+                        <span class="comment-date">{{ node.date_created|date:"d.m.Y H:i" }}</span>
+                        <div class="comment-actions">
+                            {% if node.is_approved %}
+                                <span class="status-tag status-tag--primary" title="Одобрено">✓</span>
+                            {% else %}
+                                <button class="button button-small warning approve-btn"
+                                        data-id="{{ node.id }}">Одобрить</button>
+                            {% endif %}
+                            <button class="button button-small no delete-btn" data-id="{{ node.id }}">🗑</button>
+                            <a href="{{ node.page.url }}"
+                               class="button button-small"
+                               target="_blank">🔗</a>
+                            <a href="{{ node.edit_url }}" class="button button-small">✏️</a>
+                        </div>
+                    </div>
+                    <div class="comment-content">{{ node.content|striptags|truncatechars:100 }}</div>
+                    {% if not node.is_leaf_node %}<div class="comment-children">{{ children }}</div>{% endif %}
+                </div>
+            {% endrecursetree %}
+            {# {% endwith %} #}
+            {#            {% else %}#}
+            {#                <p>Нет комментариев для отображения.</p>#}
+            {#            {% endif %}#}
+        </div>
+    </div>
+{% else %}
+    <table id="comments-table" class="listing">
+        <thead>
+            <tr>
+                <th>
+                    <input type="checkbox" id="select-all">
+                </th>
+                <th>Автор</th>
+                <th>Комментарий</th>
+                <th>
+                    Страница
+                    {% if current_page_id %}<a href="?view={{ view_type }}" title="Сбросить фильтр">✖</a>{% endif %}
+                </th>
+                <th>Дата</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comment in page_obj %}
+                <tr>
+                    <td>
+                        <input type="checkbox" class="select-comment" value="{{ comment.id }}">
+                    </td>
+                    <td>{{ comment.display_author_name }}</td>
+                    <td>{{ comment.content|striptags|truncatechars:100 }}</td>
+                    <td>
+                        {{ comment.page.title }}
+                        <span class="filter-icons">
+                            <a href="?page_id={{ comment.page.id }}&view=list"
+                               title="Только эта страница (список)">📋</a>
+                            <a href="?page_id={{ comment.page.id }}&view=tree"
+                               title="Только эта страница (дерево)">🌳</a>
+                            <a href="{{ comment.page.url }}" target="_blank">🔗</a>
+                        </span>
+                    </td>
+                    <td>{{ comment.date_created|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        {% if not comment.is_approved %}
+                            <button class="button button-small warning approve-btn"
+                                    data-id="{{ comment.id }}">Одобрить</button>
+                            {# Исправили node на comment, V на текст #}
+                        {% endif %}
+                        <button class="button button-small no delete-btn" data-id="{{ comment.id }}">Удалить</button>
+                        <a href="{{ comment.edit_url }}"
+                           class="button button-secondar button-small">✏️</a>  {# Исправили node на comment #}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+<!-- Пагинация (работает и для дерева, и для списка) -->
+    {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination" style="display: flex; justify-content: center; gap: 8px; margin: 20px 0; align-items: center;">
+            {% if page_obj.has_previous %}
+                <a href="?view={{ view_type }}&page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}&sort={{ sort_by }}&status={{ status_filter }}"
+                   class="button button-small">&laquo; Назад</a>
+            {% endif %}
+
+            <span style="color: var(--w-color-text-meta);">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?view={{ view_type }}&page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}&sort={{ sort_by }}&status={{ status_filter }}"
+                   class="button button-small">Вперед &raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

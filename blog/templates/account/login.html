@@ -1,0 +1,88 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load account socialaccount blog_tags %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block inner_content %}
+<div class="auth-form">
+    <h1 class="auth-title">Вход в систему</h1>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form class="login-form" method="POST" action="{% url 'account_login' %}">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ form.non_field_errors.0 }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.login.id_for_label }}">
+                <i class="fas fa-user"></i> Логин или Email
+            </label>
+            {{ form.login|add_attr:"placeholder:Логин или email" }}
+            {% if form.login.errors %}
+                <span class="error-text">{{ form.login.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">
+                <i class="fas fa-lock"></i> Пароль
+            </label>
+            {{ form.password|add_attr:"placeholder:Пароль" }}
+            {% if form.password.errors %}
+                <span class="error-text">{{ form.password.errors.0 }}</span>
+            {% endif %}
+        </div>
+
+        {% if form.remember %}
+        <div class="form-group-checkbox">
+            <label>
+                {{ form.remember }}
+                <span>Запомнить меня</span>
+            </label>
+        </div>
+        {% endif %}
+
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+
+        <button type="submit" class="button auth-button">
+            <i class="fas fa-sign-in-alt"></i> Войти
+        </button>
+
+        <div class="auth-links">
+            <a href="{% url 'account_reset_password' %}" class="forgot-password">
+                Забыли пароль?
+            </a>
+        </div>
+    </form>
+
+    {% get_providers as socialaccount_providers %}
+    {% if socialaccount_providers %}
+        <div class="social-auth-divider">
+            <span>или войдите через</span>
+        </div>
+
+        <div class="social-auth-buttons">
+            {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+        </div>
+    {% endif %}
+
+    <div class="auth-footer">
+        <p>Ещё нет аккаунта? <a href="{% url 'account_signup' %}">Зарегистрируйтесь</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% load blog_tags %}
+{% if nodes %}
+    <div class="widget categories-tree">
+        <h3 class="widget-title">
+            <i class="fa-solid fa-folder-tree" aria-hidden="true"></i>
+            Рубрики
+        </h3>
+        <ul>
+            {% for node in nodes %}
+                <li class="{% if node.slug == current_slug %}active{% endif %}">
+                    {% url 'category_view' node.slug as category_url %}
+                    <a href="{{ category_url }}">
+                        {{ node.name }}
+                        {% if node.num_posts %}
+                            <span style="color: var(--text-secondary); font-size: 0.8em;">({{ node.num_posts }})</span>
+                        {% endif %}
+                    </a>
+                    {% if not node.is_leaf_node %}
+                        <ul class="children">
+                            {% include "blog/zenway/components/categories_tree_level.html" with nodes=node.get_children current_slug=current_slug %}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

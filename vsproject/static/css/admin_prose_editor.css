@@ -1,0 +1,92 @@
+/* Используем более специфичные селекторы Wagtail */
+.w-field--prose_editor_form_field .prose-editor,
+.w-field--prose_editor_form_field .prose-editor-dialog {
+  --_b: var(--w-color-surface-field) !important;
+  --_f: var(--w-color-text-context) !important;
+  --_r: var(--w-color-border-field-default) !important;
+  --_a: var(--w-color-primary) !important;
+  --_d: var(--w-color-border-field-muted) !important;
+}
+
+/* Принудительное переопределение ProseMirror */
+.w-field--prose_editor_form_field .prose-editor .ProseMirror {
+  background: var(--w-color-surface-field) !important;
+  color: var(--w-color-text-context) !important;
+  border: 1px solid var(--w-color-border-field-default) !important;
+  padding: 12px !important;
+  min-height: 150px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Темная тема - более специфичные селекторы */
+body.w-theme-dark .w-field--prose_editor_form_field .prose-editor,
+body.w-theme-dark .w-field--prose_editor_form_field .prose-editor-dialog {
+  --_b: var(--w-color-surface-field-hover) !important;
+  --_f: var(--w-color-text-context) !important;
+  --_r: var(--w-color-border-field-default) !important;
+}
+
+/* Стили для меню */
+.w-field--prose_editor_form_field .prose-menubar {
+  background: var(--w-color-surface-field) !important;
+  border-bottom: 0px !important;
+  padding: 8px !important;
+  gap: 4px !important;
+}
+
+/* Кнопки меню */
+.w-field--prose_editor_form_field .prose-menubar__button {
+  padding: 3px 4px !important;
+}
+
+.w-field--prose_editor_form_field .prose-menubar__button:hover {
+  background-color: var(--w-color-surface-field-hover) !important;
+}
+
+.w-field--prose_editor_form_field .prose-menubar__button.active {
+  background-color: var(--w-color-primary) !important;
+  color: white !important;
+}
+
+/* Иконки Material Icons */
+.w-field--prose_editor_form_field .prose-menubar__button.material-icons {
+  /* font-size: 16px !important; */
+  line-height: 1 !important;
+}
+
+.w-field--prose_editor_form_field .ProseMirror tr {
+  background-color: var(--w-color-surface-field) !important;
+}
+
+
+/*!* vsproject/static/css/admin_prose_editor.css *!*/
+
+/*!* 1. Установка минимальной высоты *!*/
+/*.ProseMirror {*/
+/*    min-height: 400px;*/
+/*    !* Увеличим отступы для удобства *!*/
+/*    padding: 10px 15px !important;*/
+/*}*/
+
+/*!* 2. Адаптация под тёмную тему Wagtail (когда включена) *!*/
+/*[data-theme="dark"] .prose-editor,*/
+/*[data-theme="dark"] .ProseMirror {*/
+/*    !* Используем переменные Wagtail для цветов *!*/
+/*    --pm-bg: var(--w-color-surface-menus);       !* Фон редактора *!*/
+/*    --pm-text: var(--w-color-text-primary);        !* Цвет текста *!*/
+/*    --pm-border: var(--w-color-border-furniture);  !* Цвет рамки *!*/
+/*    --pm-button-bg: var(--w-color-surface-button-default); !* Фон кнопок *!*/
+/*    --pm-button-text: var(--w-color-text-button);      !* Текст кнопок *!*/
+/*    --pm-button-hover-bg: var(--w-color-surface-button-hover);*/
+/*    --pm-button-active-bg: var(--w-color-surface-button-active);*/
+/*}*/
+
+/*!* 3. Адаптация под светлую тему (можно оставить по умолчанию или настроить) *!*/
+/*!**/
+/*[data-theme="light"] .prose-editor,*/
+/*[data-theme="light"] .ProseMirror {*/
+/*    --pm-bg: #ffffff;*/
+/*    --pm-text: #222222;*/
+/*}*/
+/**!*/

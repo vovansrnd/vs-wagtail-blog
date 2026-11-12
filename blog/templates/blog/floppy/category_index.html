@@ -1,0 +1,26 @@
+{% extends "blog/floppy/base.html" %}
+{% load wagtailcore_tags blog_tags %}
+{% block title %}Рубрика: {{ category.name }} - Floppy games{% endblock %}
+{% block content %}
+    <div class="mso-type-page">
+        <div class="page_only">
+            <h1>Рубрика: {{ category.name }}</h1>
+        </div>
+    </div>
+    <div class="mso-type_home home_full">
+        {% if posts %}
+            {% for post in posts %}
+                {% include "blog/floppy/post_preview.html" with post=post.specific %}
+            {% endfor %}
+        {% else %}
+            <div class="page_only">
+                <div class="page_content">
+                    <p>В этой рубрике пока нет записей.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% if posts.has_other_pages %}
+        {% include "blog/floppy/components/pagination.html" with blogs=posts %}
+    {% endif %}
+{% endblock %}

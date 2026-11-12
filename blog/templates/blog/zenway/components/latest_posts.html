@@ -1,0 +1,16 @@
+{% load wagtailcore_tags %}
+{% if latest_posts %}
+    <div class="widget latest-posts">
+        <h3 class="widget-title">
+            <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+            Последние статьи
+        </h3>
+        <ul>
+            {% for post in latest_posts %}
+                <li>
+                    <a href="{% pageurl post %}">{{ post.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

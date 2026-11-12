@@ -1,0 +1,23 @@
+{% load blog_tags %}
+
+{% if nodes %}
+<div class="widget categories-tree">
+    <h3 class="widget-title">Рубрики</h3>
+    <ul>
+        {% for node in nodes %}
+            <li class="{% if node.slug == current_slug %}active{% endif %}">
+                {% url 'category_view' node.slug as category_url %}
+                <a href="{{ category_url }}">
+                    {{ node.name }} {% if node.num_posts %}({{ node.num_posts }}){% endif %}
+                </a>
+
+                {% if not node.is_leaf_node %}
+                    <ul class="children">
+                        {% include "blog/nova/components/categories_tree_level.html" with nodes=node.get_children current_slug=current_slug %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}

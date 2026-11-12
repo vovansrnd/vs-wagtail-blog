@@ -1,0 +1,37 @@
+{% load blog_tags %}
+{% get_latest_forum_topics 8 as forum_topics %}
+{% if forum_topics %}
+    <div class="widget">
+        <div class="widget-title">
+            <i class="fa-solid fa-comments" aria-hidden="true"></i>
+            Форум
+        </div>
+        <ul class="zw-forum-widget">
+            {% for topic in forum_topics %}
+                <li>
+                    <a href="{% url 'wagtail_simple_forum:topic_view' slug=topic.slug %}"
+                       title="{{ topic.title }}">
+                        <strong class="zw-fw-title">{{ topic.title|truncatechars:50 }}</strong>
+                        <span class="zw-fw-meta">
+                            <span class="zw-fw-author">{{ topic.display_author_name }}</span>
+                            <span class="zw-fw-sep">·</span>
+                            {% if topic.last_post_at %}
+                                <time datetime="{{ topic.last_post_at|date:'c' }}">
+                                    {{ topic.last_post_at|date:"d.m.y" }}
+                                </time>
+                            {% else %}
+                                <time datetime="{{ topic.created_at|date:'c' }}">
+                                    {{ topic.created_at|date:"d.m.y" }}
+                                </time>
+                            {% endif %}
+                            <span class="zw-fw-sep">·</span>
+                            <span>{{ topic.posts_count }}
+                                <i class="fa-regular fa-comment" aria-hidden="true"></i>
+                            </span>
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

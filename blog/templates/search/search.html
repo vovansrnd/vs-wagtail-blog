@@ -1,0 +1,29 @@
+{# blog/templates/blog/search_results.html #}
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block title %}Поиск{% if search_query %}: {{ search_query }}{% endif %} - {{ settings.blog.BlogSettings.site_name }}{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">Поиск{% if search_query %}: "{{ search_query }}"{% endif %}</h1>
+
+    {% if search_query %}
+        {% if search_results %}
+            <p>Найдено записей: {{ search_results.paginator.count }}</p>
+            {% for result in search_results %}
+                {# Используем ваш существующий шаблон для предпросмотра статьи #}
+                {% include "blog/"|add:theme|add:"/post_preview.html" with post=result.specific %}
+            {% endfor %}
+
+            {# Добавляем пагинацию #}
+            {% if search_results.has_other_pages %}
+                {% include "blog/"|add:theme|add:"/components/pagination.html" with blogs=search_results %} {# Используем blogs=search_results для универсальности #}
+            {% endif %}
+        {% else %}
+            <p>По вашему запросу "<strong>{{ search_query }}</strong>" ничего не найдено.</p>
+        {% endif %}
+    {% else %}
+        <p>Пожалуйста, введите запрос в поле поиска.</p>
+    {% endif %}
+
+{% endblock %}

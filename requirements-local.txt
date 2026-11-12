@@ -1,0 +1,45 @@
+# Version-pinned local development snapshot for the currently validated stack.
+# This file is NOT a production-host manifest and makes no claim about the
+# operating system, ABI, system libraries, or resource limits on Sprinthost.
+# Verify production capabilities on the actual hosting account before changing
+# image codecs or binary-package pins.
+#
+# Django 6.0.9 / Wagtail 8.1 are the project's current validated versions.
+# django-js-asset 4.2.0 is pinned for compatibility with django-prose-editor 0.27.3.
+# django-js-asset пин 4.2.0: 5.0 ломает django-prose-editor 0.27.3.
+Django==6.0.9
+wagtail==8.1
+django-allauth==65.21.1
+django-filter==26.2
+django-modelcluster==6.5
+django-mptt==0.18.0
+django-ninja==1.7.3
+django-permissionedforms==0.1
+django-prose-editor==0.27.3
+django-taggit==6.1.0
+django-tasks==0.12.0
+django-treebeard==5.3.1
+djangorestframework==3.18.3
+# 5.0.0 ломает django-prose-editor 0.27.3 (убрал importmap в js-списках)
+django-js-asset==4.2.0
+Pillow==12.2.0
+# pillow-heif is included in this local environment only; production support
+# must be checked against the actual Sprinthost runtime before enabling HEIF.
+pillow_heif==1.8.1
+psycopg2-binary==2.9.13
+bleach==6.4.0
+beautifulsoup4==4.15.0
+nh3==0.3.7
+openpyxl==3.1.5
+filetype==1.2.0
+requests==2.34.2
+PyJWT==2.15.1
+pydantic==2.14.2
+
+# Плагины проекта (версии, опубликованные на PyPI 2026-11-10):
+# wagtail-image-directories==0.2.1
+# wagtail-mptt-comments==0.2.8
+# wagtail-prose-editor-images==0.2.4
+# wagtail-simple-forum==0.1.2
+# wagtail-langreader==0.4.1 остаётся отдельной установкой из его репозитория.
+# wagtail-desktop-publisher==0.3.3 — отдельное GUI-приложение, не Django app.

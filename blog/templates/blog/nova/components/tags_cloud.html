@@ -1,0 +1,16 @@
+{% load blog_tags %}
+{% if tags %}
+    <div class="widget tag-cloud">
+        <h3 class="widget-title">{{ title|default:"Облако тегов" }}</h3>
+        <div class="tags-list">
+            {% for tag_item in tags %}
+                {% url 'tag_view' tag_item.slug as tag_url %}
+                <a href="{{ tag_url }}"
+                   class="tag-weight-{{ tag_item.weight }}{% if tag and tag.slug == tag_item.slug %} active{% endif %}">
+                    {{ tag_item.name }}
+                    {% if tag_item.num_times %}<sub>{{ tag_item.num_times }}</sub>{% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}

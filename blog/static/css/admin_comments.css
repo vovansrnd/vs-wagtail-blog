@@ -1,0 +1,169 @@
+/* static/css/admin_comments.css */
+.comment-tree {
+    margin: 0;
+    padding-left: 10px;
+    list-style: none;
+}
+
+.comment-node {
+    margin-bottom: 10px;
+    border-left: 2px solid #444;
+    padding-left: 15px;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+}
+
+.comment-children {
+    margin-left: 30px;
+    padding-left: 10px;
+    border-left: 1px dashed #444;
+}
+
+.comment-content {
+    padding: 8px;
+    margin: 5px 0;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}
+
+
+.listing table {
+    width: 100%;
+    background: #252525;
+    color: #e0e0e0;
+}
+
+.listing th, .listing td {
+    padding: 8px;
+    border-bottom: 1px solid #444;
+}
+
+.button-active {
+    background: #007d7e;
+    color: white;
+}
+
+/* Адаптация стандартных классов Wagtail */
+.w-header {
+    background: #333;
+    color: #fff;
+}
+
+.status-tag {
+    color: #fff;
+}
+
+.filter-icons a {
+  font-size: 0.8em;
+  margin-left: 3px;
+  text-decoration: none;
+}
+
+.edit-comment-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.ace-editor-container {
+    border: 1px solid #444;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+.parent-selector {
+    width: 100%;
+    padding: 8px;
+    background: #252525;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+/* static/css/admin_comments.css */
+
+/* Добавляем основной контейнер для нашей панели, чтобы задать ему отступы */
+.comment-panel-container {
+    padding: 20px; /* Добавляем отступы со всех сторон */
+}
+
+/*.comment-tree {*/
+/*    margin: 0;*/
+/*    padding: 0;*/
+/*    list-style: none;*/
+/*    !* Убедимся, что дерево не вылезает за пределы контейнера *!*/
+/*    max-width: 100%;*/
+/*    overflow-x: auto; !* Если дерево станет слишком широким, появится скролл *!*/
+/*}*/
+
+/* Сделаем стили для узла дерева чуть компактнее */
+.comment-node {
+    margin-bottom: 12px;
+    padding-left: 15px;
+    border-left: 2px solid #444;
+    background: rgba(0,0,0,0.1); /* Легкий фон для всего узла */
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.comment-header {
+    display: flex;
+    flex-wrap: wrap; /* Позволяем переноситься на новую строку на малых экранах */
+    align-items: center;
+    gap: 10px;
+    padding: 0; /* Убираем внутренний паддинг, т.к. он теперь в .comment-node */
+    background: none; /* Убираем фон, т.к. он теперь в .comment-node */
+}
+
+/* Добавляем отдельный блок для кнопок, чтобы они были справа */
+.comment-actions-inline {
+    margin-left: auto; /* Это прижмет блок кнопок к правому краю */
+    display: flex;
+    gap: 5px;
+}
+
+.comment-children {
+    margin-top: 10px;
+    padding-left: 15px; /* Уменьшим отступ для детей */
+    border-left: 1px dashed #555;
+}
+
+.comment-content {
+    padding: 8px;
+    margin: 8px 0; /* Увеличим вертикальный отступ */
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    word-break: break-word; /* Предотвращаем разрыв макета длинными словами */
+}
+
+/* Стили для контролов в хедере */
+.w-header__controls {
+    display: flex;
+    gap: 20px; /* Расстояние между группами контролов */
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-controls, .sort-controls, .view-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* ... остальные ваши стили ... */

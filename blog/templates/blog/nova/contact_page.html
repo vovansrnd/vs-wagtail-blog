@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block extra_head %}
+    {{ form.media }}
+{% endblock %}
+
+{% block content %}
+    <div class="contact-form">
+        <h1>{{ page.title }}</h1>
+        <div class="intro">{{ page.intro|richtext }}</div>
+
+        <form action="" method="POST">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Хитрый Honeypot: прячем его стилями за пределы экрана -->
+            <div style="position: absolute; left: -8979px; top: -8979px;" aria-hidden="true">
+                {{ form.company_website.label_tag }}
+                {{ form.company_website }}
+            </div>
+
+            <!-- Скрытый таймер -->
+            {{ form.form_token }}
+
+            <!-- Выводим только реальные поля, созданные в админке Wagtail -->
+            {% for field in form %}
+                {% if field.name != 'company_website' and field.name != 'form_token' %}
+                    <p>
+                        {{ field.label_tag }}<br>
+                        {{ field }}
+                        {% if field.errors %}
+                            <span style="color:red; font-size:12px;">{{ field.errors.0 }}</span>
+                        {% endif %}
+                    </p>
+                {% endif %}
+            {% endfor %}
+
+            <button type="submit" class="button">Отправить</button>
+        </form>
+    </div>
+{% endblock %}

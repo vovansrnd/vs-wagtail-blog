@@ -1,0 +1,29 @@
+{% load wagtailimages_tags %}
+{% with p=product.specific %}
+<div class="widget product-widget">
+  <span class="head-s">Рекомендую</span>
+  <a href="{{ p.url }}" class="product-widget__image">
+    {% if p.hero_image %}{% image p.hero_image fill-320x180 class="img" alt=p.title %}{% endif %}
+  </a>
+  <div class="product-widget__body">
+    <a class="product-widget__title" href="{{ p.url }}">{{ p.title }}</a>
+    {% if p.subtitle %}<div class="product-widget__subtitle">{{ p.subtitle }}</div>{% endif %}
+    {% if p.price %}<div class="product-widget__price">{{ p.price }}</div>{% endif %}
+    {% if p.features %}
+      <ul class="product-widget__features">
+        {% for f in p.features|slice:":3" %}
+          <li>{{ f.value.title }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <div class="product-widget__cta">
+      <a href="{{ p.url }}" class="button-small">Подробнее</a>
+      {% if p.buy_links %}
+        {% with link=p.buy_links.0.value %}
+          <a href="{{ link.url }}" class="button-small button-ghost" target="_blank" rel="noopener">Купить</a>
+        {% endwith %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endwith %}

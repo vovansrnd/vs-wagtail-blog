@@ -1,0 +1,16 @@
+{% load wagtailcore_tags blog_tags %}
+{% get_latest_posts_by_tag 'mini' 10 as mini_posts %}
+{% if mini_posts %}
+    <div class="widget mini-posts">
+        <h3 class="widget-title">
+            <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+            Мини-обзоры
+        </h3>
+        <div class="mini-posts-list">
+            {% for post in mini_posts %}
+                <a href="{% pageurl post %}" title="{{ post.title }}">{{ post.title }}</a>
+                {% if not forloop.last %}<span class="sep">···</span>{% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}

@@ -1,0 +1,15 @@
+{% load blog_tags %}
+{% for child in nodes %}
+    <li class=" {% if child.slug == current_slug %}active{% endif %} {% if child.visible_children %}group{% endif %} ">
+        {% url 'category_view' child.slug as category_url %}
+        <a href="{{ category_url }}">
+            <span class="category-name">{{ child.name }}</span>
+            {% if child.num_posts %}<span class="category-count">({{ child.num_posts }})</span>{% endif %}
+        </a>
+        {% if child.visible_children %}
+            <ul class="children level{{ child.level|add:1 }}">
+                {% include "blog/zenway/components/categories_tree_level.html" with nodes=child.visible_children current_slug=current_slug %}
+            </ul>
+        {% endif %}
+    </li>
+{% endfor %}

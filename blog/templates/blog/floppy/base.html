@@ -1,0 +1,154 @@
+{% load static wagtailcore_tags blog_tags wagtailimages_tags mptt_comment_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block title %}
+            {% if page.seo_title %}
+                {{ page.seo_title }}
+            {% else %}
+                {{ page.title }}
+            {% endif %}
+        {% endblock title %} - Floppy games
+    </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    {% if page %}
+        <meta property="og:url" content="{{ page.get_full_url }}">
+        <meta property="og:title" content="{{ page.seo_title|default:page.title }}">
+        {% if page.main_image and page.main_image.file %}
+            {% image page.main_image fill-1200x630 as og_image %}
+            <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ og_image.url }}">
+        {% endif %}
+        {% if page.excerpt %}
+            <meta property="og:description" content="{{ page.excerpt|striptags }}">
+        {% elif page.search_description %}
+            <meta property="og:description" content="{{ page.search_description }}">
+        {% elif page.body %}
+            <meta property="og:description" content="{{ page.body|striptags|truncatewords:25 }}">
+        {% endif %}
+    {% endif %}
+
+    {% block meta_description %}
+        <meta name="description" content="{{ page.search_description|default:'Обзоры старых и маленьких игр' }}">
+    {% endblock meta_description %}
+    {% if page.seo_keywords %}<meta name="keywords" content="{{ page.seo_keywords }}">{% endif %}
+
+    <link rel="shortcut icon" href="{% static 'css/floppy/ico/favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="{% static 'css/floppy/style.css' %}" type="text/css" media="screen">
+    <link rel="stylesheet" href="{% static 'css/floppy/print.css' %}" type="text/css" media="print">
+    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/feed/">
+
+    {% block extra_head %}{% endblock extra_head %}
+    {{ form.media }}
+</head>
+<body>
+    <div id="wrapper">
+        <div id="header">
+            <div class="b-title">
+                <h1><a href="/">Floppy games</a></h1>
+                <div>обзоры маленьких игр</div>
+            </div>
+            <div class="b-menu">
+                <ul>
+                    <li class="first {% if request.path == '/' %}selected{% endif %}">
+                        <a href="/"><span>Главная</span></a>
+                    </li>
+                    <li class="{% if '/about/' in request.path %}selected{% endif %}">
+                        <a href="/about/"><span>О сайте</span></a>
+                    </li>
+                    <li class="last {% if '/archive/' in request.path %}selected{% endif %}">
+                        <a href="/archive/"><span>Архив</span></a>
+                    </li>
+                    <li>
+                        <a href="/feed/" title="RSS-лента сайта" class="rss">RSS</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="wrap-page">
+            <div id="page">
+                {% block content %}{% endblock content %}
+            </div>
+        </div>
+
+        <div id="sidebars">
+            <div id="sidebar1">
+                <div class="wrap">
+                    <!-- Поиск -->
+                    <div class="widget widget_1_1 search_form_widget">
+                        <div class="w0">
+                            <div class="w1">
+                                <form class="mso-form search-form" action="{{ search_page_url|default:'/search/' }}" method="get">
+                                    <input type="search" name="query" placeholder="Что искать?">
+                                    <button type="submit">Поиск</button>
+                                </form>
+                            </div>
+                            <div class="w2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Облако тегов -->
+                    <div class="widget widget_1_2 tagclouds_widget">
+                        <div class="w0">
+                            <div class="w1">
+                                <div class="mso-widget-header">
+                                    <span>Популярные метки</span>
+                                </div>
+                                <div class="tagclouds">
+                                    {% get_tags_for_cloud as tags_list %}
+                                    {% for tag_item in tags_list %}
+                                        {% url 'tag_view' tag_item.slug as tag_url %}
+                                        <span style="font-size: {% if tag_item.weight <= 1 %}100{% elif tag_item.weight == 2 %}130{% elif tag_item.weight == 3 %}160{% elif tag_item.weight == 4 %}190{% else %}230{% endif %}%">
+                                            <a href="{{ tag_url }}">{{ tag_item.name }}</a><sub>{{ tag_item.num_times }}</sub>
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="w2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Последние комментарии -->
+                    <div class="widget widget_1_3 last_comments_widget">
+                        <div class="w0">
+                            <div class="w1">
+                                <div class="mso-widget-header">
+                                    <span>Комментарии</span>
+                                </div>
+                                {% get_latest_comments 10 as latest_comments %}
+                                {% regroup latest_comments by page as comments_by_page %}
+                                {% for group in comments_by_page %}
+                                    <h2 class="last_comment_title">{{ group.grouper.title }}</h2>
+                                    <ul class="mso-widget-list">
+                                        {% for c in group.list %}
+                                            <li class="last_comment_anonim">
+                                                <a href="{% pageurl group.grouper %}#comment-{{ c.id }}">
+                                                    <b>{{ c.display_author_name }} »</b>
+                                                    {{ c.content|striptags|truncatewords:15 }}
+                                                </a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                            <div class="w2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="sidebar2">
+                <div class="wrap"></div>
+            </div>
+        </div>
+
+        <div id="footer">
+            &copy; Floppy games, {% now "Y" %}. <a href="/accounts/login/">Вход</a>
+        </div>
+    </div>
+    {% block extra_js %}{% endblock extra_js %}
+</body>
+</html>

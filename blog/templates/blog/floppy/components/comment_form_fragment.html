@@ -1,0 +1,72 @@
+{# Фрагмент формы комментария floppy для ленивой загрузки #}
+{% load i18n socialaccount blog_tags %}
+        <div class="mso-comment-leave">Оставьте комментарий!</div>
+        <div class="mso-comment-form">
+            <a id="comment-form-anchor"></a>
+        {% if messages %}
+        <div class="mso-messages">
+        {% for message in messages %}<div class="alert alert-{{ message.tags }}">{{ message }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        <form class="mso-form compose-form" method="post" action="{% url 'wagtail_mptt_comments:add_comment_to_page' page.id %}" data-form-type="comment">
+                {% csrf_token %}
+                {{ form.parent }}
+                {{ form.form_token }}
+          {{ form.captcha_token }}
+
+                <!-- Хитрый Honeypot (антиспам) -->
+                <div style="position: absolute; left: -9999px; top: -9999px;" aria-hidden="true">
+                    {{ form.website_url.label_tag }}
+                    {{ form.website_url }}
+                </div>
+
+                <div class="mso-comments-textarea">
+                    <label for="id_content">Текст сообщения:</label>
+                    {{ form.content }}
+                    {% if form.content.errors %}<div class="field-error">{{ form.content.errors.0 }}</div>{% endif %}
+
+                    <div class="mso-comments-auth">
+                        {% if user.is_authenticated %}
+                            <p>Вы вошли как <b>{{ user.username }}</b>.</p>
+                        {% else %}
+                            <!-- Делаем поля в два столбца -->
+                            <div class="form-row-compact">
+                                <div class="form-group">
+                                    <label>Имя:</label>
+                                    {{ form.author_name }}
+                                    {% if form.author_name.errors %}<div class="field-error">{{ form.author_name.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="form-group">
+                                    <label>E-mail:</label>
+                                    {{ form.author_email }}
+                                    {% if form.author_email.errors %}<div class="field-error">{{ form.author_email.errors.0 }}</div>{% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Выравниваем капчу, чекбокс и кнопку в одну линию -->
+                    <div class="form-bottom-compact">
+                        {% if not user.is_authenticated %}
+                            <div class="captcha-group">
+                                <label>{{ form.captcha_answer.label }}</label>
+                                {{ form.captcha_answer }}
+                                {% if form.captcha_answer.errors %}
+                                    <span class="field-error" style="display:block;">{{ form.captcha_answer.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div></div> <!-- Пустой блок для выравнивания (flex-box) -->
+                        {% endif %}
+
+                        <div class="submit-group">
+                            <label class="notify-label">
+                                {{ form.notify_on_reply }} Уведомить об ответе
+                            </label>
+                            <button class="button" type="submit">Отправить</button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>

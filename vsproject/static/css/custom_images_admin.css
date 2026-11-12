@@ -1,0 +1,57 @@
+/* Улучшения для админки изображений */
+
+/* Индикаторы year/slug в списке изображений */
+.listing td[data-column="year"],
+.listing td[data-column="slug"] {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    background: #f0f8ff;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+/* Быстрые фильтры в заголовке */
+.image-quick-filters {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    padding: 10px 0;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+/* Анимации */
+.category-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Улучшенные всплывающие подсказки */
+.category-card[title] {
+    position: relative;
+}
+
+.category-card[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+}

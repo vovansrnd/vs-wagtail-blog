@@ -1,0 +1,112 @@
+{% extends "account/base.html" %}
+{% load i18n blog_tags %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block inner_content %}
+<div class="auth-form">
+    <h1 class="auth-title">Регистрация</h1>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form class="signup-form" method="POST" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ form.non_field_errors.0 }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label for="{{ form.email.id_for_label }}">
+            <i class="fas fa-envelope"></i> Email
+          </label>
+          {{ form.email|add_attr:"placeholder:Email" }}
+          {% if form.email.errors %}
+            <span class="error-text">{{ form.email.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.username.id_for_label }}">
+            <i class="fas fa-user"></i> Имя пользователя
+          </label>
+          {{ form.username|add_attr:"placeholder:Имя пользователя" }}
+          {% if form.username.errors %}
+            <span class="error-text">{{ form.username.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.password1.id_for_label }}">
+            <i class="fas fa-lock"></i> Пароль
+          </label>
+          {{ form.password1|add_attr:"placeholder:Пароль" }}
+          {% if form.password1.errors %}
+            <span class="error-text">{{ form.password1.errors.0 }}</span>
+          {% endif %}
+
+          {# Вместо автогенерируемого help_text на англ. – пишите свой #}
+          <div class="help-text">
+            <ul>
+              <li>Пароль не должен быть слишком похож на вашу личную информацию.</li>
+              <li>Пароль должен содержать не менее 8 символов.</li>
+              <li>Пароль не должен быть общепринятым или часто используемым.</li>
+              <li>Пароль не может состоять только из цифр.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="{{ form.password2.id_for_label }}">
+            <i class="fas fa-lock"></i> Подтвердите пароль
+          </label>
+          {{ form.password2|add_attr:"placeholder:Подтвердите пароль" }}
+          {% if form.password2.errors %}
+            <span class="error-text">{{ form.password2.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        {# Антибот-защита (Д50/Д51): honeypot — скрытое поле-ловушка #}
+        <div aria-hidden="true">
+          {{ form.company }}
+        </div>
+
+        {# Математическая проверка: задание генерирует сервер, ответ хранится #}
+        {# только на сервере; в HTML — только непрозрачный id задания (Д51) #}
+        <div class="form-group">
+          <label for="{{ form.math_answer.id_for_label }}">
+            <i class="fas fa-shield-halved"></i> {{ form.math_question }}
+          </label>
+          {{ form.math_answer }}
+          <input type="hidden" name="math_token" value="{{ form.math_task_id }}">
+          {% if form.math_answer.errors %}
+            <span class="error-text">{{ form.math_answer.errors.0 }}</span>
+          {% endif %}
+          {% if form.non_field_errors %}
+            <span class="error-text">{{ form.non_field_errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+
+        <button type="submit" class="button auth-button">
+            <i class="fas fa-user-plus"></i> Зарегистрироваться
+        </button>
+    </form>
+
+    <div class="auth-footer">
+        <p>Уже есть аккаунт? <a href="{% url 'account_login' %}">Войдите</a></p>
+    </div>
+</div>
+{% endblock %}

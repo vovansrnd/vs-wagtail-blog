@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+{% block title %}Архив блога | Vs-Svet{% endblock %}
+{% block content %}
+    <h1 class="page-title">Архив записей</h1>
+    <div class="blog-post">
+        {% regroup posts by date_published.year as year_list %}
+        {% for year in year_list %}
+            <h2 style="margin-top: 2rem;
+                       border-bottom: 2px solid var(--primary-color);
+                       display: inline-block">{{ year.grouper }}</h2>
+            {% regroup year.list by date_published|date:"F" as month_list %}
+            <div style="margin-left: 1rem;">
+                {% for month in month_list %}
+                    <h3 style="margin-top: 1.5rem; color: var(--text-secondary);">{{ month.grouper|title }}</h3>
+                    <ul style="list-style: none; padding-left: 0;">
+                        {% for post in month.list %}
+                            <li style="margin-bottom: 0.5rem; display: flex; gap: 1rem;">
+                                <span style="color: var(--text-secondary); min-width: 50px;">{{ post.date_published|date:"d.m" }}</span>
+                                <a href="{% pageurl post %}" style="font-weight: 500;">{{ post.title }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

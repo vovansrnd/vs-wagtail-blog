@@ -1,0 +1,49 @@
+{% load blog_tags %}
+{% get_available_themes as themes %}
+{% get_current_theme as current_theme %}
+{% get_available_palettes as palettes %}
+{% get_current_palette as current_palette %}
+<div class="widget theme-switcher">
+    <span class="head-s">
+        <i class="fa-solid fa-palette" aria-hidden="true"></i>
+        Оформление
+    </span>
+    <div style="padding: var(--space-sm);">
+
+        <hr style="border-color: var(--border-color); margin: var(--space-xs) 0;">
+        <h4 class="palette-group-title">Светлые</h4>
+        <ul class="palette-list">
+            {% for p in palettes.light %}
+                <li class="palette-item{% if p.id == current_palette %} active{% endif %}">
+                    <a href="{% url_replace palette=p.id %}"
+                       title="{{ p.name }}"
+                       aria-label="{{ p.name }}">
+                        <span class="swatch" style="background: {{ p.color }}"></span>
+                        {% if p.id == current_palette %}
+                            <span class="swatch-check" aria-hidden="true">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+        <h4 class="palette-group-title">Тёмные</h4>
+        <ul class="palette-list">
+            {% for p in palettes.dark %}
+                <li class="palette-item{% if p.id == current_palette %} active{% endif %}">
+                    <a href="{% url_replace palette=p.id %}"
+                       title="{{ p.name }}"
+                       aria-label="{{ p.name }}">
+                        <span class="swatch" style="background: {{ p.color }}"></span>
+                        {% if p.id == current_palette %}
+                            <span class="swatch-check" aria-hidden="true">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

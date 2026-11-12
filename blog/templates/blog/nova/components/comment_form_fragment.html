@@ -1,0 +1,257 @@
+{# Фрагмент формы комментария для ленивой загрузки (private, no-store). #}
+{# Извлечён из components/comments.html при кэш-рефакторинге. #}
+{% load i18n socialaccount blog_tags %}
+    <section class="comment-compose"
+             id="comment-form-anchor"
+             aria-label="Форма комментария">
+      {# Строка-заглушка #}
+      <div class="compose-trigger"
+           id="compose-trigger"
+           tabindex="0">
+        {% if user.is_authenticated %}
+          {% user_avatar_url user 32 as my_avatar %}
+          <img src="{{ my_avatar }}"
+               alt=""
+               class="compose-avatar"
+               width="32"
+               height="32"
+               aria-hidden="true">
+        {% else %}
+          <span class="compose-avatar compose-avatar--guest" aria-hidden="true">
+            <i class="fa-solid fa-user"></i>
+          </span>
+        {% endif %}
+        <span class="compose-placeholder">Написать комментарий…</span>
+        {% if not user.is_authenticated %}
+          <span class="compose-social-hint">
+            Быстрый вход:
+            {% if 'yandex'|social_provider_enabled %}
+              <a href="{% provider_login_url 'yandex' %}?next={{ request.path|urlencode }}%23comment-form-anchor"
+               class="btn-social-inline btn-yandex"
+               title="Яндекс ID"
+               onclick="event.stopPropagation()"><i class="fa-brands fa-yandex" aria-hidden="true"></i></a>
+            {% endif %}
+          </span>
+        {% endif %}
+      </div>
+      {# Тело формы #}
+      <div class="compose-body" id="compose-body" {% if not messages and 'success' not in request.GET and "has_errors" not in request.GET %}hidden{% endif %}>
+        {% if messages %}
+          {% if messages or 'success=1' in request.GET or 'has_errors' in request.GET %}
+  <script>document.addEventListener('DOMContentLoaded', function () {
+    var b = document.getElementById('compose-body');
+    var t = document.getElementById('compose-trigger');
+    if (b) { b.hidden = false; }
+    if (t) { t.hidden = true; }
+  });</script>
+  {% endif %}
+  {% for message in messages %}<div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>{% endfor %}
+        {% endif %}
+        {% if user.is_authenticated %}
+          <div class="compose-user-row">
+            {% user_avatar_url user 32 as my_avatar %}
+            <img src="{{ my_avatar }}"
+                 alt="Аватар"
+                 class="compose-avatar"
+                 width="32"
+                 height="32">
+            <span class="compose-username">{{ user.get_full_name|default:user.username }}</span>
+            <a href="{% url 'account_logout' %}?next={{ page.url }}" class="compose-logout">Выйти</a>
+          </div>
+        {% endif %}
+        <form method="post" action="{% url 'wagtail_mptt_comments:add_comment_to_page' page.id %}" class="compose-form" novalidate data-form-type="comment">
+          {% csrf_token %}
+          {{ form.parent }}
+          {{ form.form_token }}
+          {{ form.captcha_token }}
+          {# Honeypot #}
+          <div style="position:absolute;
+                      left:-9999px;
+                      top:-9999px;
+                      width:1px;
+                      height:1px;
+                      overflow:hidden">
+            <label for="id_website_url">Ваш сайт:</label>
+            <input type="text"
+                   name="website_url"
+                   tabindex="-1"
+                   autocomplete="off"
+                   id="id_website_url"
+                   aria-hidden="true">
+          </div>
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+              {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+            </div>
+          {% endif %}
+          {% if not user.is_authenticated %}
+            <div class="compose-guest-row">
+              <div class="compose-field">
+                {{ form.author_name }}
+                {% if form.author_name.errors %}<div class="compose-error">{{ form.author_name.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="compose-field">
+                {{ form.author_email }}
+                {% if form.author_email.errors %}<div class="compose-error">{{ form.author_email.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+          {% endif %}
+          <div class="compose-editor">
+            {{ form.content }}
+            {% if form.content.errors %}<div class="compose-error">{{ form.content.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="compose-footer">
+            <div class="compose-footer-left">
+              {% if not user.is_authenticated %}
+                <span class="compose-captcha">
+                  {{ form.captcha_answer.label_tag }}
+                  {{ form.captcha_answer }}
+                  {% if form.captcha_answer.errors %}<span class="compose-error">{{ form.captcha_answer.errors.0 }}</span>{% endif %}
+                </span>
+              {% endif %}
+              <label class="compose-notify">
+                {{ form.notify_on_reply }}
+                <span>{{ form.notify_on_reply.label }}</span>
+              </label>
+            </div>
+            <div class="compose-footer-right">
+              <button type="button" class="compose-cancel" id="compose-cancel">Отмена</button>
+              <button type="submit" class="compose-submit" data-action="submit-comment">
+                <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+                Отправить
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+  {# /comments-wrap #}
+  <script>
+(function () {
+  'use strict';
+  var trigger = document.getElementById('compose-trigger');
+  var body    = document.getElementById('compose-body');
+  var cancel  = document.getElementById('compose-cancel');
+  if (!trigger || !body) return;
+
+  /**
+   * Находит первый «настоящий» фокусируемый элемент внутри формы,
+   * пропуская hidden-поля, checkbox и honeypot.
+   */
+  function findFirstVisibleInput() {
+    // Все кандидаты
+    var inputs = body.querySelectorAll(
+      'input, textarea, .ProseMirror[contenteditable="true"]'
+    );
+    for (var i = 0; i < inputs.length; i++) {
+      var el = inputs[i];
+      // Пропускаем hidden
+      if (el.type === 'hidden') continue;
+      // Пропускаем checkbox
+      if (el.type === 'checkbox') continue;
+      // Пропускаем honeypot (tabindex=-1)
+      if (el.tabIndex === -1) continue;
+      // Пропускаем невидимые (внутри overflow:hidden контейнеров за экраном)
+      var rect = el.getBoundingClientRect();
+      // Если элемент вне viewport по left — это honeypot
+      if (rect.right < 0 || rect.left < -9000) continue;
+      return el;
+    }
+    return null;
+  }
+
+  function open(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+
+    body.hidden = false;
+    trigger.hidden = true;
+    trigger.setAttribute('aria-expanded', 'true');
+
+    // Скроллим к форме, а НЕ к случайному input
+    requestAnimationFrame(function () {
+      var anchor = document.getElementById('comment-form-anchor');
+      if (anchor) {
+        anchor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+
+    // Фокус на первый видимый input с задержкой
+    // (чтобы ProseMirror успел инициализироваться)
+    setTimeout(function () {
+      var firstInput = findFirstVisibleInput();
+      if (firstInput) {
+        // preventScroll — чтобы фокус НЕ дёргал страницу
+        firstInput.focus({ preventScroll: true });
+      }
+    }, 150);
+  }
+
+  function close() {
+    body.hidden = true;
+    trigger.hidden = false;
+    trigger.setAttribute('aria-expanded', 'false');
+    // Сброс parent при закрытии
+    var parentInput = body.querySelector('input[name="parent"]');
+    if (parentInput) parentInput.value = '';
+  }
+
+  trigger.addEventListener('click', function (e) { open(e); });
+  trigger.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(e); }
+  });
+  if (cancel) cancel.addEventListener('click', close);
+
+  {% if form.errors %}open();{% endif %}
+
+  document.addEventListener('reply-requested', function () { open(); });
+  // ── Надежная вставка цитаты для Firefox и Chrome ──
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('.comment-reply-btn');
+      if (!btn) return;
+
+      var commentId = btn.dataset.commentId;
+      var author = btn.dataset.commentAuthor || '';
+      var quoteCb = document.getElementById('with_quote_' + commentId);
+      var textEl = document.getElementById('comment-html-' + commentId);
+
+      // Если галочка цитирования не стоит — оставляем стандартное поведение (только @Имя)
+      if (!quoteCb || !quoteCb.checked) return;
+
+      // Они запрещают штатному comment_handler.js сработать повторно в Хроме!
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      // Читаем текст для цитаты
+      var quoteText = textEl ? textEl.textContent.trim().split(/\s+/).slice(0, 50).join(' ') : '';
+      var bqHtml = '<blockquote><p><strong>@' + author + '</strong></p><p>' + quoteText + '</p></blockquote><p></p>';
+
+      // Распахиваем форму сразу
+      open();
+
+      // Даем браузеру доскроллить и перерисовать DOM
+      setTimeout(function () {
+        var editor = document.querySelector('.compose-form .ProseMirror[contenteditable="true"]');
+        if (!editor) return;
+
+        editor.focus();
+
+        // Способ 1 (Работает идеально в Firefox и Chrome для contenteditable)
+        var success = false;
+        try {
+          success = document.execCommand('insertHTML', false, bqHtml);
+        } catch (err) {
+          success = false;
+        }
+
+        // Если execCommand не сработал — шлем InputEvent, чтобы ProseMirror перечитал DOM
+        if (success) {
+          editor.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        if (quoteCb) quoteCb.checked = false;
+      }, 250);
+    }, true);
+}());
+  </script>

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[co]
+
+# Виртуальное окружение
+.venv/
+
+# Файловый кэш Django (BASE_DIR/cache на хостинге)
+cache/
+
+# Журналы Django/security (включая ротацию; могут содержать IP посетителей)
+django_errors.log*
+security.log*
+
+# Результат collectstatic — генерируется при развёртывании, не исходники
+/static/
+
+# HexIsles и другие игровые приложения ведутся в отдельном репозитории
+/games/
+
+# Локальные черновики настроек
+vsproject/settings/123123/
+vsproject/settings/base.py-loc
+
+# Локальные секреты (ключи API и пр.)
+vsproject/settings/local_secrets.py
+
+# Данные читалки LangReader: книги, словари, озвучка, обложки, ассеты книг
+media/langreader/

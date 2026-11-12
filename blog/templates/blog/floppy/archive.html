@@ -1,0 +1,46 @@
+{% extends "blog/floppy/base.html" %}
+{% load wagtailcore_tags %}
+{% block title %}Архив - Floppy games{% endblock %}
+{% block content %}
+    <div class="mso-type-page">
+        <div class="page_only">
+            <h1>Архив записей</h1>
+            <div class="page_content type_page">
+                <div class="sitemap">
+                    {# 1. Группируем по году #}
+                    {% regroup posts by date_published.year as year_list %}
+                    <ul>
+                        {% for year in year_list %}
+                            <li>
+                                <h2 class="sitemap">{{ year.grouper }} год</h2>
+                                {# 2. Группируем по месяцу внутри года #}
+                                {% regroup year.list by date_published|date:"F" as month_list %}
+                                <ul>
+                                    {% for month in month_list %}
+                                        <li>
+                                            <h3>{{ month.grouper|title }}</h3>
+                                            <ul>
+                                                {# 3. Выводим сами статьи #}
+                                                {% for post in month.list %}
+                                                    <li>
+                                                        {{ post.date_published|date:"d.m" }} &mdash;
+                                                        <a href="{% pageurl post %}">{{ post.title }}</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Пагинация архива #}
+    {% if posts.has_other_pages %}
+        {% include "blog/floppy/components/pagination.html" with blogs=posts %}
+    {% endif %}
+{% endblock %}

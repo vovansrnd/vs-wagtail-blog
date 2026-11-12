@@ -1,0 +1,26 @@
+{% extends "blog/floppy/base.html" %}
+{% load wagtailcore_tags blog_tags %}
+{% block title %}Метка: {{ tag.name }} - Floppy games{% endblock title %}
+{% block content %}
+    <div class="mso-type-page">
+        <div class="page_only">
+            <h1>Записи с меткой: {{ tag.name }}</h1>
+        </div>
+    </div>
+    <div class="mso-type_home home_full">
+        {% if posts %}
+            {% for post in posts %}
+                {% include "blog/floppy/post_preview.html" with post=post.specific %}
+            {% endfor %}
+        {% else %}
+            <div class="page_only">
+                <div class="page_content">
+                    <p>Записей с этой меткой пока нет.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    {% if posts.has_other_pages %}
+        {% include "blog/floppy/components/pagination.html" with blogs=posts %}
+    {% endif %}
+{% endblock content %}

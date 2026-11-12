@@ -1,0 +1,52 @@
+{% load wagtailcore_tags wagtailimages_tags %}
+<div class="page_only">
+    <div class="page-info">
+        {% if post.categories.all %}
+            {% for cat in post.categories.all %}
+                <a href="{% url 'category_view' cat.slug %}">{{ cat.name }}</a>
+                {% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% else %}
+            Без рубрики
+        {% endif %}
+        &mdash;
+        <span class="comments-link">
+            <a href="{% pageurl post %}#comment-section">
+                {% if post.approved_comments_count > 0 %}
+                    Комментариев: {{ post.approved_comments_count }}
+                {% else %}
+                    Нет комментариев
+                {% endif %}
+            </a>
+        </span>
+    </div>
+    <div class="page-date">
+        <span class="day">{{ post.date_published|date:"d" }}</span>
+        <br>
+        {{ post.date_published|date:"M y"|lower }}
+    </div>
+    <h2>
+        <a href="{% pageurl post %}" title="{{ post.title }}">{{ post.title }}</a>
+    </h2>
+    <div class="page_content type_home">
+        {% if post.main_image %}
+            <div class="post-preview-image">
+                <a href="{% pageurl post %}">
+                    {% image post.main_image width-600 as img %}
+                    <img src="{{ img.url }}" alt="{{ post.title }}">
+                </a>
+            </div>
+        {% endif %}
+
+        <div class="post-excerpt">
+            {% if post.excerpt %}
+                <p>{{ post.excerpt|striptags|truncatewords:40 }}</p>
+            {% else %}
+                <p>{{ post.body|striptags|truncatewords:40 }}</p>
+            {% endif %}
+        </div>
+
+        <span class="mso-cut"><a href="{% pageurl post %}#cut" title="Далее...">Далее...</a></span>
+    </div>
+</div>
+<!-- /div.page_only -->

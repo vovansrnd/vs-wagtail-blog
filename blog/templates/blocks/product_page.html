@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load wagtailimages_tags wagtailcore_tags %}
+
+{% block title %}{{ page.seo_title|default:page.title }}{% endblock %}
+{% block extra_head %}
+{#  <link rel="stylesheet" href="{% static 'css/product.css' %}">#}
+{% endblock %}
+{% block layout_mod %}no-sidebar{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+  <article class="product-landing">
+    <header class="product-hero">
+      <div class="hero-media">
+        {% if page.hero_image %}{% image page.hero_image fill-1600x800 class="hero-img" alt=page.title %}{% endif %}
+      </div>
+      <div class="hero-text">
+        <h1 class="page-title">{{ page.title }}</h1>
+        {% if page.subtitle %}<p class="subtitle">{{ page.subtitle }}</p>{% endif %}
+        {% if page.price %}<div class="price">{{ page.price }}</div>{% endif %}
+        <div class="hero-cta">
+          {% if page.buy_links %}
+            {% for l in page.buy_links %}
+              <a class="button-small" href="{{ l.value.url }}" target="_blank" rel="noopener">
+                {{ l.value.label }}
+              </a>
+            {% endfor %}
+          {% endif %}
+          <a class="button-small button-ghost" href="/contact/">Связаться</a>
+        </div>
+      </div>
+    </header>
+
+    {% if page.intro %}<section class="section intro">{{ page.intro|richtext }}</section>{% endif %}
+
+    {% if page.features %}
+      <section class="section">
+        <h2 class="head-s">Особенности</h2>
+        <div class="features-grid">
+          {% for f in page.features %}
+            <div class="feature">
+              {% if f.value.icon %}<i class="{{ f.value.icon }}"></i>{% endif %}
+              <h3>{{ f.value.title }}</h3>
+              {% if f.value.text %}<p>{{ f.value.text }}</p>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    {% if page.specs %}
+      <section class="section">
+        <h2 class="head-s">Технические характеристики</h2>
+        <dl class="specs">
+          {% for s in page.specs %}
+            <div class="spec">
+              <dt>{{ s.value.name }}</dt>
+              <dd>{{ s.value.value }}</dd>
+            </div>
+          {% endfor %}
+        </dl>
+      </section>
+    {% endif %}
+
+    {% if page.testimonials %}
+      <section class="section">
+        <h2 class="head-s">Отзывы</h2>
+        <div class="testimonials">
+          {% for t in page.testimonials %}
+            <blockquote class="testimonial">
+              <p>“{{ t.value.quote }}”</p>
+              <footer>— {{ t.value.author }}{% if t.value.source %}, {{ t.value.source }}{% endif %}
+                {% if t.value.url %}<a href="{{ t.value.url }}" target="_blank" rel="noopener">Источник</a>{% endif %}
+              </footer>
+            </blockquote>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </article>
+{% endblock %}

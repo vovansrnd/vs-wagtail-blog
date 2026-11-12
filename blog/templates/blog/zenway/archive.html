@@ -1,0 +1,44 @@
+{% extends "blog/zenway/base.html" %}
+{% load wagtailcore_tags blog_tags %}
+{% block title %}Архив — Страница {{ posts.number }} | ZenWay{% endblock %}
+{% block content %}
+    <header class="page-header">
+        <div class="page-title-block">
+            <h1 class="page-title">Архив записей</h1>
+        </div>
+        <div class="view-controls" style="justify-content: flex-end;">
+            <div class="view-info">
+                <span class="posts-count">
+                    <i class="fas fa-archive" aria-hidden="true"></i>
+                    <strong>{{ posts.paginator.count }}</strong>
+                    <span>{{ posts.paginator.count|ru_pluralize:"запись,записи,записей" }}</span>
+                </span>
+            </div>
+        </div>
+    </header>
+    <div class="archive-content">
+        {% regroup posts by date_published.year as year_list %}
+        {% for year in year_list %}
+            <h2 class="archive-year">{{ year.grouper }}</h2>
+            {% regroup year.list by date_published|date:"F" as month_list %}
+            <div class="archive-months">
+                {% for month in month_list %}
+                    <h3 class="archive-month">{{ month.grouper|title }}</h3>
+                    <ul class="archive-list">
+                        {% for post in month.list %}
+                            <li class="archive-item">
+                                <span class="archive-date">{{ post.date_published|date:"d.m" }}</span>
+                                <a href="{% pageurl post %}">{{ post.title }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    {% if posts.has_other_pages %}
+        <nav class="pagination-wrapper" role="navigation" aria-label="Постраничная навигация">
+            {% include "blog/zenway/components/pagination.html" with blogs=posts %}
+        </nav>
+    {% endif %}
+{% endblock %}

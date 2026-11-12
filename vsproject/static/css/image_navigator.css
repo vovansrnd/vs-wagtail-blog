@@ -1,0 +1,476 @@
+/* Стили для навигатора изображений */
+.directory-browser {
+    padding: 20px;
+    background: #fafafa;
+    min-height: calc(100vh - 200px);
+}
+
+.navigator-stats {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.navigator-stats .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.directory-year {
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.directory-year-header {
+    background: #f5f5f5;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.directory-year-header:hover {
+    background: #ebebeb;
+}
+
+.year-title {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.year-stats {
+    color: #666;
+    font-size: 14px;
+}
+
+.directory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.directory-item {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+}
+
+.directory-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: #43b1b0;
+}
+
+.directory-item a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.directory-icon {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.directory-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.folder-icon {
+    font-size: 48px;
+    color: #43b1b0;
+}
+
+.directory-info {
+    padding: 15px;
+    background-color: var(--w-color-surface-header);
+}
+
+.directory-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.directory-count {
+    font-size: 13px;
+    color: #666;
+}
+
+.directory-path {
+    font-size: 11px;
+    color: #999;
+    margin-top: 4px;
+    font-family: monospace;
+}
+
+/* Анимация разворачивания */
+.directory-content {
+    /*max-height: 0;*/
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.directory-year.expanded .directory-content {
+    max-height: 2000px;
+}
+
+.expand-icon {
+    transition: transform 0.3s;
+    display: inline-block;
+}
+
+.directory-year.expanded .expand-icon {
+    transform: rotate(90deg);
+}
+
+/* Быстрые действия */
+.quick-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.directory-item:hover .quick-actions {
+    opacity: 1;
+}
+
+.quick-action-btn {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #666;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.quick-action-btn:hover {
+    background: #43b1b0;
+    color: white;
+    border-color: #43b1b0;
+}
+
+/* Промо-блок для навигатора в стандартном списке */
+.navigator-prompt {
+    margin: 20px;
+}
+
+.image-index-header-extra {
+    padding: 15px;
+    background: #e3f2fd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.navigator-link {
+    display: inline-block;
+    padding: 8px 20px;
+    background: #43b1b0;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.navigator-link:hover {
+    background: #359a99;
+    color: white;
+}
+
+/* Стили для темной темы */
+body.dark-mode .directory-browser,
+.dark-theme .directory-browser {
+    background: #1e1e1e;
+}
+
+body.dark-mode .navigator-stats,
+body.dark-mode .directory-year,
+body.dark-mode .directory-info,
+body.dark-mode .directory-icon,
+.dark-theme .navigator-stats,
+.dark-theme .directory-year,
+.dark-theme .directory-info,
+.dark-theme .directory-icon {
+    background: #2d2d2d;
+    color: #e0e0e0;
+}
+
+body.dark-mode .directory-year-header,
+.dark-theme .directory-year-header {
+    background: #252525;
+    border-bottom-color: #333;
+}
+
+body.dark-mode .directory-year-header:hover,
+.dark-theme .directory-year-header:hover {
+    background: #333;
+}
+
+body.dark-mode .directory-item,
+.dark-theme .directory-item {
+    background: #252525;
+    border-color: #333;
+}
+
+body.dark-mode .directory-item:hover,
+.dark-theme .directory-item:hover {
+    border-color: #43b1b0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+body.dark-mode .stat-number,
+.dark-theme .stat-number {
+    color: #e0e0e0;
+}
+
+body.dark-mode .stat-label,
+body.dark-mode .year-stats,
+body.dark-mode .directory-count,
+body.dark-mode .directory-path,
+.dark-theme .stat-label,
+.dark-theme .year-stats,
+.dark-theme .directory-count,
+.dark-theme .directory-path {
+    color: #999;
+}
+
+body.dark-mode .quick-action-btn,
+.dark-theme .quick-action-btn {
+    background: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-mode .quick-action-btn:hover,
+.dark-theme .quick-action-btn:hover {
+    background: #43b1b0;
+    color: white;
+    border-color: #43b1b0;
+}
+
+body.dark-mode .image-index-header-extra,
+.dark-theme .image-index-header-extra {
+    background: #2d3748;
+}
+
+body.dark-mode .folder-icon,
+.dark-theme .folder-icon {
+    color: #4fd1c5;
+}
+
+body.dark-mode .directory-item a,
+.dark-theme .directory-item a {
+    color: #e0e0e0;
+}
+
+.help-info {
+    background-color: var(--w-color-surface-header);
+    border-radius: 3px;
+    padding-inline-start: 3.5em;
+    position: relative;
+    flex-direction: row;
+    display: flex;
+    justify-content: space-between;
+}
+
+.help-block {
+    clear: both;
+    color: inherit;
+    margin: 1em;
+    padding: 1em;
+}
+
+.help-block p {
+    margin: 0.5em;
+}
+
+
+/*   dfdfg    */
+
+
+.images-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+.image-item {
+    border: 1px solid var(--w-color-border-furniture);
+    border-radius: 5px;
+    padding: 15px;
+    width: 250px;
+    background-color: var(--w-color-surface-header);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.image-thumbnail {
+    text-align: center;
+    margin-bottom: 15px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.image-thumbnail img {
+    max-width: 100%;
+    max-height: 140px;
+    border-radius: 3px;
+}
+.image-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.image-meta {
+    margin-bottom: 15px;
+}
+.meta-item {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+.meta-label {
+    font-weight: bold;
+    color: #666;
+}
+.image-actions {
+    display: flex;
+    gap: 10px;
+}
+.image-actions .button {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 13px;
+}
+.image-actions .icon {
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+}
+
+
+/* ─── header: общий отступ Wagtail уже даёт класс nice-padding ─── */
+/* Стили для header */
+header .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+header .left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+header .left h1 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.3;
+}
+
+/* Большая иконка слева от заголовка */
+header .left > .icon-image {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    color: var(--w-color-primary);
+}
+
+header .right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Стили для кнопок в header */
+header .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+/* Иконки внутри кнопок */
+header .button .icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    header .row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    header .right {
+        width: 100%;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    header .button {
+        flex: 1;
+        justify-content: center;
+        min-width: 140px;
+    }
+}
+
+/* Дополнительные стили для улучшения внешнего вида */
+.nice-padding {
+    padding: 20px 30px;
+    background-color: var(--w-color-surface-header);
+    border-bottom: 1px solid var(--w-color-border-furniture);
+}
