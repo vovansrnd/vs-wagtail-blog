@@ -36,10 +36,13 @@ requests==2.34.2
 PyJWT==2.15.1
 pydantic==2.14.2
 
-# Плагины проекта (версии, опубликованные на PyPI 2026-11-10):
-# wagtail-image-directories==0.2.1
-# wagtail-mptt-comments==0.2.8
-# wagtail-prose-editor-images==0.2.4
-# wagtail-simple-forum==0.1.2
-# wagtail-langreader==0.4.1 остаётся отдельной установкой из его репозитория.
-# wagtail-desktop-publisher==0.3.3 — отдельное GUI-приложение, не Django app.
+# Wagtail plugins currently published on PyPI. Unreleased D67 candidates are
+# deliberately excluded until their source branches are reviewed and released.
+wagtail-image-directories==0.2.1
+wagtail-mptt-comments==0.2.8
+wagtail-prose-editor-images==0.2.4
+wagtail-simple-forum==0.1.2
+
+# Optional private extension (not distributed on PyPI):
+# install wagtail-langreader from its private source, then set ENABLE_LANGREADER=1.
+# wagtail-desktop-publisher is a separate GUI application, not a Django dependency.

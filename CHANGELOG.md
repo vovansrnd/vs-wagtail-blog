@@ -2,7 +2,7 @@
 
 ## 2026-10-30 — LangReader (языковая читалка)
 
-- Подключён плагин wagtail-langreader 0.3.x на `/reader/`: EPUB/TXT/HTML-книги,
+- Владелец может отдельно включить приватный плагин wagtail-langreader 0.3.x на `/reader/`: EPUB/TXT/HTML-книги,
   личный словарь (learning/known/ignored), повторение по Лейтнеру, локальные
   словари (En-Ru, Es-Ru DSL) и словарная озвучка `media/langreader/sounds/<lang>.pak + .idx`.
 - Интерфейс принудительно на русском: локаль `locale/ru/` в плагине,
@@ -24,4 +24,11 @@
 - Made Open Graph and Floppy article image sizes real renditions while preserving the explicitly bounded legacy rendition allowlist elsewhere.
 - Added staged schema changes for image path length and Unicode folder slugs; existing media files are not moved.
 
-This is a staging candidate. Django/Wagtail runtime tests, migration execution, and storage/browser integration checks are still required.
+## Public distribution notes
+
+- The public core does not include the separate HexIsles game application.
+- The private LangReader integration is optional and disabled by default; set
+  `ENABLE_LANGREADER=1` only when its package and data are installed separately.
+- `requirements-local.txt` pins stable Wagtail plugin releases available from PyPI.
+  Unreleased D67 candidates are not installation requirements.
+

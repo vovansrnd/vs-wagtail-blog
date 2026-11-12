@@ -32,7 +32,6 @@ urlpatterns = [
     path("admin/", include(wagtailadmin_urls)),
     path("documents/", include(wagtaildocs_urls)),
     path("api/v3/", wagtailapi_v3_urls.api.urls),
-    path("reader/", include("wagtail_langreader.urls")),
 
     # Личные фрагменты (private/no-store): никогда не кэшируются публично
     path("personal/menu/", blog_views.personal_menu, name="personal_menu"),
@@ -53,10 +52,6 @@ urlpatterns = [
     # Plugin routes
     path("comments/", include("wagtail_mptt_comments.urls")),
 
-    # Ридер: редирект без слеша. APPEND_SLASH тут не срабатывает: catch-all
-    # Wagtail делает любой путь «валидным», и /reader попадает в поиск
-    # страницы, а не в CommonMiddleware.
-    path("reader", RedirectView.as_view(url="/reader/", permanent=False)),
 
     # Tag and category indexes
     re_path(rf"^tag/(?P<slug>{UNICODE_SLUG_REGEX})/?$", blog_views.tag_view, name="tag_view"),
@@ -73,6 +68,13 @@ urlpatterns = [
     # nosniff и sandbox-политикой для активных типов. См. media_views.py.
     re_path(r"^media/(?P<path>.*)$", serve_public_media),
 ]
+
+# Optional private LangReader integration; public installs do not need the package.
+if getattr(settings, "ENABLE_LANGREADER", False):
+    urlpatterns.extend([
+        path("reader/", include("wagtail_langreader.urls")),
+        path("reader", RedirectView.as_view(url="/reader/", permanent=False)),
+    ])
 
 # Development static/media helpers must also precede Wagtail's catch-all.
 if settings.DEBUG:

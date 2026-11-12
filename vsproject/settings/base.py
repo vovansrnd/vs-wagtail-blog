@@ -16,6 +16,12 @@ import os
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
+# Optional private extension. Disabled in a clean/public installation.
+# Set ENABLE_LANGREADER=1 only when wagtail_langreader is installed separately.
+ENABLE_LANGREADER = os.environ.get("ENABLE_LANGREADER", "0").strip().lower() in {
+    "1", "true", "yes", "on"
+}
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -45,7 +51,6 @@ INSTALLED_APPS = [
     # Плагины — ПОСЛЕ приложений проекта, чтобы шаблоны приложений
     # могли переопределять шаблоны плагинов (app-templates ищутся по порядку)
     "wagtail_simple_forum",
-    "wagtail_langreader",
     "wagtail.images",
     "wagtail.search",
     "wagtail.admin",
@@ -78,6 +83,9 @@ INSTALLED_APPS = [
     'bleach',
     "wagtail.api.v3",
 ]
+
+if ENABLE_LANGREADER:
+    INSTALLED_APPS.insert(INSTALLED_APPS.index("wagtail.images"), "wagtail_langreader")
 
 # SITE_ID = 1  # Обычно 1, если у вас один сайт Django
 # Настройки allauth (примеры)
@@ -186,9 +194,11 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
 #    "blog.middleware.DebugUploadMiddleware",
     "blog.middleware.ThemePaletteMiddleware",
-    # Читалка всегда на русском, независимо от языка браузера
-    "wagtail_langreader.middleware.reader_language",
 ]
+
+if ENABLE_LANGREADER:
+    # Keep it after LocaleMiddleware and the core request middleware.
+    MIDDLEWARE.append("wagtail_langreader.middleware.reader_language")
 
 ROOT_URLCONF = "vsproject.urls"
 DEFAULT_BLOG_THEME = "nova"

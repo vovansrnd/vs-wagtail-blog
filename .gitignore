@@ -18,6 +18,9 @@ security.log*
 # HexIsles и другие игровые приложения ведутся в отдельном репозитории
 /games/
 
+# Built/vendor wheels are resolved from pinned PyPI releases in this public snapshot.
+/vendor_wheels/
+
 # Локальные черновики настроек
 vsproject/settings/123123/
 vsproject/settings/base.py-loc
