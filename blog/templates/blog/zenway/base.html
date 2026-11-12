@@ -173,16 +173,10 @@
                     {% get_latest_posts_by_category 'howtos' 10 1 as howto_posts %}
                     {% include "blog/zenway/components/howtos_posts.html" with howto_posts=howto_posts %}
 
-                    {# 5. Облако: Техника #}
-                    {% get_tags_for_cloud 'tech' as tech_tags %}
-                    {% if tech_tags %}
-                        {% include "blog/zenway/components/tags_cloud.html" with tags=tech_tags title="Теги: Техника" %}
-                    {% endif %}
-
-                    {# 6. Облако: Разное #}
-                    {% get_tags_for_cloud 'life' as life_tags %}
-                    {% if life_tags %}
-                        {% include "blog/zenway/components/tags_cloud.html" with tags=life_tags title="Теги: Разное" %}
+                    {# ZenWay has no separate live "life" section: show one combined tag cloud. #}
+                    {% get_tags_for_cloud 'tech' as popular_tags %}
+                    {% if popular_tags %}
+                        {% include "blog/zenway/components/tags_cloud.html" with tags=popular_tags title="Популярные теги" %}
                     {% endif %}
 
                     {# 7. Комментарии #}
