@@ -64,18 +64,22 @@ class SiteTestRunner(DiscoverRunner):
         except Exception as exc:  # noqa: BLE001 — диагностика не маскирует вердикт
             print(f"[test_runner] teardown diagnostics failed: "
                   f"{type(exc).__name__}: {exc}")
+        try:
+            self._drain_and_clear(old_config)
+        except Exception as exc:  # noqa: BLE001 — очистка не маскирует вердикт
+            print(f"[test_runner] teardown drain failed: "
+                  f"{type(exc).__name__}: {exc}")
         return super().teardown_databases(old_config)
 
     def _print_foreign_sessions(self, old_config):
         """Read-only диагностика посторонних сессий ТОЛЬКО тестовых БД
         текущего запуска (PostgreSQL).
 
-        pg_terminate_backend НЕ выполняется (Д68-Б): причина ObjectInUse не
-        установлена — три чистых прогона после исправления тестов прошли
-        без рецидива, и автоматическое завершение посторонних подключений
-        не обосновано. Если ObjectInUse повторится, эта диагностика назовёт
-        pid, состояние и последний запрос виновной сессии — тогда решение
-        о завершении будет предметным и адресным.
+        Улики Д68-Т: две утечки замечены этой диагностикой — idle-сессия с
+        последним запросом SELECT к blog_invalidationepoch, живущая до
+        выхода процесса (явление A), и ObjectInUse при пустой диагностике —
+        гонка close→DROP, когда backend своего соединения ещё не завершился
+        к моменту DROP DATABASE (явление B).
         """
         for connection, original_name, is_primary in old_config:
             if not is_primary or connection.vendor != "postgresql":
@@ -85,12 +89,91 @@ class SiteTestRunner(DiscoverRunner):
                 continue  # не переключено — не диагностируем
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "SELECT pid, state, query FROM pg_stat_activity "
+                    "SELECT pid, state, query, backend_start FROM pg_stat_activity "
                     "WHERE datname = %s AND pid <> pg_backend_pid()",
                     [test_name],
                 )
                 stragglers = cursor.fetchall()
-            for pid, state, query in stragglers:
+            for pid, state, query, backend_start in stragglers:
                 snippet = (query or "").strip().replace("\n", " ")[:120]
                 print(f"[test_runner] foreign session on test DB {test_name!r}: "
-                      f"pid={pid} state={state} last_query={snippet!r}")
+                      f"pid={pid} state={state} backend_start={backend_start} "
+                      f"last_query={snippet!r}")
+
+    def _drain_and_clear(self, old_config):
+        """Детерминированная очистка тестовых БД текущего запуска.
+
+        Для каждой тестовой БД из old_config (PostgreSQL, первичные алиасы):
+        1) закрыть собственное соединение — его backend завершается
+           асинхронно, и DROP сразу после close() попадает в гонку (явление
+           B: ObjectInUse на собственном умирающем соединении);
+        2) дождаться НУЛЯ сессий на тестовой БД (опрос из отдельного
+           подключения к postgres, до 5 с);
+        3) если сессии остались — это утечка соединения самого процесса
+           (явление A: соединение живёт до выхода процесса): завершить их
+           pg_terminate_backend и дождаться нуля.
+
+        Границы: только тестовые БД ЭТОГО запуска (old_config), только
+        teardown, только PostgreSQL. Сбой шага не маскирует вердикт сюита —
+        исключение печатается, стандартный teardown выполняется как прежде.
+        """
+        import time
+
+        import psycopg2
+
+        for connection, original_name, is_primary in old_config:
+            if not is_primary or connection.vendor != "postgresql":
+                continue
+            test_name = connection.settings_dict["NAME"]
+            if test_name == original_name:
+                continue
+            settings = connection.settings_dict
+            pg = psycopg2.connect(
+                dbname="postgres", user=settings["USER"],
+                password=settings["PASSWORD"], host=settings.get("HOST") or None,
+                port=settings.get("PORT") or None, connect_timeout=10,
+            )
+            pg.set_session(autocommit=True)
+            try:
+                connection.close()  # наш backend начинает завершаться
+                deadline = time.monotonic() + 5.0
+                stragglers = self._sessions_on(pg, test_name)
+                while stragglers and time.monotonic() < deadline:
+                    time.sleep(0.05)
+                    stragglers = self._sessions_on(pg, test_name)
+                if stragglers:
+                    print(f"[test_runner] {len(stragglers)} lingering session(s) "
+                          f"on {test_name!r} after drain; terminating "
+                          f"(утечка соединения процесса — явление A):")
+                    for pid, state, query, backend_start in stragglers:
+                        snippet = (query or "").strip().replace("\n", " ")[:120]
+                        print(f"[test_runner]   terminating pid={pid} state={state} "
+                              f"backend_start={backend_start} last_query={snippet!r}")
+                        with pg.cursor() as cur:
+                            cur.execute("SELECT pg_terminate_backend(%s)", [pid])
+                    deadline = time.monotonic() + 5.0
+                    stragglers = self._sessions_on(pg, test_name)
+                    while stragglers and time.monotonic() < deadline:
+                        time.sleep(0.05)
+                        stragglers = self._sessions_on(pg, test_name)
+                    if stragglers:
+                        pids = [pid for pid, *_ in stragglers]
+                        print(f"[test_runner] WARNING: sessions still present "
+                              f"on {test_name!r}: {pids}")
+                else:
+                    zero_in = round(5.0 - (deadline - time.monotonic()), 1)
+                    print(f"[test_runner] test DB {test_name!r} drained in "
+                          f"~{zero_in}s sessions; DROP без гонки")
+            finally:
+                pg.close()
+
+    @staticmethod
+    def _sessions_on(pg, test_name):
+        """Сессии на тестовой БД (опрос из подключения к postgres)."""
+        with pg.cursor() as cur:
+            cur.execute(
+                "SELECT pid, state, query, backend_start FROM pg_stat_activity "
+                "WHERE datname = %s",
+                [test_name],
+            )
+            return cur.fetchall()
