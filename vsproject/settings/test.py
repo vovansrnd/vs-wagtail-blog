@@ -22,3 +22,10 @@ CACHES = {
 # Письма из тестов не должны уходить в sendmail/SMTP даже при ошибке
 # логгера: locmem вместо любого smtp-бэкенда.
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+# Тестовый раннер Д68: создаёт запись Django Site "testserver" (Host
+# Django-тестового клиента) в каждой тестовой БД. Без неё CurrentSiteMiddleware
+# отдаёт Site.DoesNotExist на любой client-запрос в чистой установке:
+# по Host записи нет, а SITE_ID в многосайтовом проекте сознательно не
+# задаётся. См. vsproject/test_runner.py.
+TEST_RUNNER = "vsproject.test_runner.SiteTestRunner"

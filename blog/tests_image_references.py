@@ -4,7 +4,9 @@ These tests use the project's configured CustomImage and temporary media
 storage. They never delete or physically move media files.
 """
 from io import BytesIO
+import importlib.util
 import tempfile
+import unittest
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
@@ -14,14 +16,32 @@ from PIL import Image as PILImage
 from wagtail.models import Page
 
 from blog.models import BlogPage, CustomImage
-from wagtail_image_directories.references import (
-    build_image_file_target_index,
-    content_field_names_for_model,
-    find_referenced_images,
-    scan_content_and_revision_references,
+
+# wagtail_image_directories.references — API сканера ссылок, которого ещё нет
+# в опубликованном wagtail-image-directories 0.2.1 (появится в кандидате 0.2.2).
+# Отсутствие ИМЕННО этого субмодуля — штатный skip класса ниже; маскировать
+# нельзя ни отсутствие самого плагина (жёсткая зависимость), ни ошибки импорта
+# ВНУТРИ существующего субмодуля. Поэтому find_spec (не выполняет код
+# субмодуля и не ловит его ImportError), а обычный import — только при
+# наличии модуля: тогда внутренний ImportError пробрасывается как есть.
+REFERENCES_API_AVAILABLE = (
+    importlib.util.find_spec("wagtail_image_directories.references") is not None
 )
 
+if REFERENCES_API_AVAILABLE:
+    from wagtail_image_directories.references import (
+        build_image_file_target_index,
+        content_field_names_for_model,
+        find_referenced_images,
+        scan_content_and_revision_references,
+    )
 
+
+@unittest.skipUnless(
+    REFERENCES_API_AVAILABLE,
+    "wagtail_image_directories.references отсутствует в опубликованном "
+    "wagtail-image-directories 0.2.1 (API сканера ссылок — кандидат 0.2.2)",
+)
 class ImageReferenceScannerIntegrationTests(TestCase):
     @classmethod
     def setUpClass(cls):
