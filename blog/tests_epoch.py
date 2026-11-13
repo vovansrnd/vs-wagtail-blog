@@ -1,4 +1,15 @@
-"""Тесты Этапа 2 (durable epoch) — вытеснение, конкурентность, сигналы, миграция 0039."""
+"""Тесты Этапа 2 (durable epoch) — вытеснение, конкурентность, сигналы, миграция 0039.
+
+Квартет ConcurrentBumpTests + MigrationChainTests + ConcurrentRestoreTests +
+RequestStartedIntegrationTests в ОДНОМ процессе — минимальный воспроизводитель
+teardown-утечки Д68-Т: reopened-коннект внутри test_async_asend_resets_cache
+(второй get_blog_cache_epoch после asend) ускользает от штатных путей закрытия
+и живёт до выхода процесса; сигнатура — idle-сессия с последним SELECT к
+blog_invalidationepoch. Тест соединение сам не закрывает: ускользнувший
+коннект остаётся незакрытым в процессе; его диагностирует и завершает
+дренаж раннера — vsproject/test_runner.py (teardown_databases), строго в
+пределах сессий с меткой запуска (application_name).
+"""
 import os
 import threading
 from unittest import mock
