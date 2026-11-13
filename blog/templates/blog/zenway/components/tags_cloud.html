@@ -3,8 +3,7 @@
     <div class="widget tag-cloud">
         <h3 class="widget-title">
             <i class="fa-solid fa-tags" aria-hidden="true"></i>
-            {% comment %} {{ title|default:"Облако тегов" }} {% endcomment %}
-            Облако тегов
+            {{ title|default:"Облако тегов" }}
         </h3>
         <div class="tags-list">
             {% for tag_item in tags %}
