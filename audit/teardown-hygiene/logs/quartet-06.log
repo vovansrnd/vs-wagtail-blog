@@ -1,0 +1,35 @@
+Creating test database for alias 'default'...
+.Page created: "Epoch home" id=4 content_type=wagtailcore.Page path=/epoch-home/
+Page created: "Epoch пост" id=5 content_type=blog.BlogPage path=/epoch-home/epoch-post/
+Page edited: "Epoch пост" id=5 revision_id=1
+Published: "Epoch пост" pk=5 revision_id=1
+.....Page created: "Seed home" id=6 content_type=wagtailcore.Page path=/seed-home/
+Page created: "Seed пост" id=7 content_type=blog.BlogPage path=/seed-home/seed-post/
+Page edited: "Seed пост" id=7 revision_id=2
+Published: "Seed пост" pk=7 revision_id=2
+.InvalidationEpoch недоступна (сбой БД): page cache безопасно обойдён
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/models.py", line 110, in get_epoch
+    return cls.objects.only("epoch").get(pk=1).epoch
+           ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+Exception: db down
+....InvalidationEpoch pk=1 отсутствует: page cache безопасно обойдён (bypass). Восстановите строку миграцией 0039.
+.............
+----------------------------------------------------------------------
+Ran 24 tests in 7.389s
+
+OK
+Destroying test database for alias 'default'...
+Found 24 test(s).
+System check identified no issues (0 silenced).
+[test_runner] foreign session on test DB 'test_a1020391_django_radio': pid=571608 state=idle backend_start=2026-11-13 23:27:31.761644+00:00 last_query='SELECT "blog_invalidationepoch"."id", "blog_invalidationepoch"."epoch" FROM "blog_invalidationepoch" WHERE "blog_invalid'
+[test_runner]   terminating leaked own session pid=571608 state=idle backend_start=2026-11-14 02:27:31.761644+03:00 last_query='SELECT "blog_invalidationepoch"."id", "blog_invalidationepoch"."epoch" FROM "blog_invalidationepoch" WHERE "blog_invalid'
+[test_runner] test DB 'test_a1020391_django_radio' drained in ~0.0s (terminated=1); DROP без гонки

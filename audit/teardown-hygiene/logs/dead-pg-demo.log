@@ -1,0 +1,7 @@
+демо: дренаж при недоступном postgres (порт 5499)
+[test_runner] teardown diagnostics failed: AttributeError: '_StubConn' object has no attribute 'cursor'
+[test_runner] teardown drain failed: OperationalError: connection to server at "127.0.0.1", port 5499 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+  [демо] штатный teardown завершился с RuntimeError: demo: super-teardown недоступен на заглушке
+ИТОГ: исключение дренажа перехвачено и напечатано выше; вердикт сюиты не маскируется, стандартный teardown продолжается

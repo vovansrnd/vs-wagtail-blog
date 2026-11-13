@@ -1,0 +1,118 @@
+Creating test database for alias 'default'...
+.Page created: "Epoch home" id=4 content_type=wagtailcore.Page path=/epoch-home/
+Page created: "Epoch пост" id=5 content_type=blog.BlogPage path=/epoch-home/epoch-post/
+Page edited: "Epoch пост" id=5 revision_id=1
+Published: "Epoch пост" pk=5 revision_id=1
+.....Page created: "Seed home" id=6 content_type=wagtailcore.Page path=/seed-home/
+Page created: "Seed пост" id=7 content_type=blog.BlogPage path=/seed-home/seed-post/
+Page edited: "Seed пост" id=7 revision_id=2
+Published: "Seed пост" pk=7 revision_id=2
+.InvalidationEpoch недоступна (сбой БД): page cache безопасно обойдён
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/d68audit-base/blog/models.py", line 110, in get_epoch
+    return cls.objects.only("epoch").get(pk=1).epoch
+           ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+Exception: db down
+....InvalidationEpoch pk=1 отсутствует: page cache безопасно обойдён (bypass). Восстановите строку миграцией 0039.
+.............
+----------------------------------------------------------------------
+Ran 24 tests in 9.688s
+
+OK
+Destroying test database for alias 'default'...
+Found 24 test(s).
+System check identified no issues (0 silenced).
+[test_runner] foreign session on test DB 'test_a1020391_django_radio': pid=564149 state=idle last_query='SELECT "blog_invalidationepoch"."id", "blog_invalidationepoch"."epoch" FROM "blog_invalidationepoch" WHERE "blog_invalid'
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/backends/utils.py", line 103, in _execute
+    return self.cursor.execute(sql)
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+psycopg2.errors.ObjectInUse: database "test_a1020391_django_radio" is being accessed by other users
+DETAIL:  There is 1 other session using the database.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/d68audit-base/manage.py", line 31, in <module>
+    main()
+    ~~~~^^
+  File "/opt/MyApps/wagtail/d68audit-base/manage.py", line 27, in main
+    execute_from_command_line(sys.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/core/management/__init__.py", line 443, in execute_from_command_line
+    utility.execute()
+    ~~~~~~~~~~~~~~~^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/core/management/__init__.py", line 437, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/core/management/commands/test.py", line 24, in run_from_argv
+    super().run_from_argv(argv)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/core/management/base.py", line 420, in run_from_argv
+    self.execute(*args, **cmd_options)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/core/management/base.py", line 464, in execute
+    output = self.handle(*args, **options)
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/core/management/commands/test.py", line 63, in handle
+    failures = test_runner.run_tests(test_labels)
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/test/runner.py", line 1141, in run_tests
+    self.teardown_databases(old_config)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/opt/MyApps/wagtail/d68audit-base/vsproject/test_runner.py", line 67, in teardown_databases
+    return super().teardown_databases(old_config)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/test/runner.py", line 1069, in teardown_databases
+    _teardown_databases(
+    ~~~~~~~~~~~~~~~~~~~^
+        old_config,
+        ^^^^^^^^^^^
+    ...<2 lines>...
+        keepdb=self.keepdb,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/test/utils.py", line 381, in teardown_databases
+    connection.creation.destroy_test_db(old_name, verbosity, keepdb)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/backends/base/creation.py", line 330, in destroy_test_db
+    self._destroy_test_db(test_database_name, verbosity)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/backends/postgresql/creation.py", line 91, in _destroy_test_db
+    return super()._destroy_test_db(test_database_name, verbosity)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/backends/base/creation.py", line 346, in _destroy_test_db
+    cursor.execute(
+    ~~~~~~~~~~~~~~^
+        "DROP DATABASE %s" % self.connection.ops.quote_name(test_database_name)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/opt/MyApps/wagtail/venv-wg81/lib/python3.14/site-packages/django/db/backends/utils.py", line 103, in _execute
+    return self.cursor.execute(sql)
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+django.db.utils.OperationalError: database "test_a1020391_django_radio" is being accessed by other users
+DETAIL:  There is 1 other session using the database.
+

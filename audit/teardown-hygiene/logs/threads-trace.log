@@ -1,0 +1,67 @@
+----------------------------------------------------------------------
+Ran 8 tests in 5.597s
+
+OK
+System check identified no issues (0 silenced).
+[test_runner] foreign session on test DB 'test_a1020391_django_radio': pid=566094 state=idle backend_start=2026-11-13 23:09:27.996773+00:00 last_query='SELECT "blog_invalidationepoch"."id", "blog_invalidationepoch"."epoch" FROM "blog_invalidationepoch" WHERE "blog_invalid'
+[test_runner]   terminating leaked own session pid=566094 state=idle backend_start=2026-11-14 02:09:27.996773+03:00 last_query='SELECT "blog_invalidationepoch"."id", "blog_invalidationepoch"."epoch" FROM "blog_invalidationepoch" WHERE "blog_invalid'
+[test_runner] test DB 'test_a1020391_django_radio' drained in ~0.0s (terminated=1); DROP без гонки
+=== TIMELINE (тесты и соединения) ===
+23:08:58.585882 N    pid=565972 thread='MainThread' alias=__no_db__
+23:08:58.646556 C    pid=565972 thread='MainThread' alias=__no_db__
+23:08:58.844270 N    pid=565973 thread='MainThread' alias=default
+23:09:24.038714 TEST test_concurrent_bumps_no_duplicates_no_old_namespace (blog.tests_epoch.ConcurrentBumpTests.test_concurrent_bumps_no_duplicates_no_old_namespace) 
+23:09:24.080272 N    pid=566063 thread='Thread-1 (worker)' alias=default
+23:09:24.082785 N    pid=566066 thread='Thread-3 (worker)' alias=default
+23:09:24.083627 C    pid=566063 thread='Thread-1 (worker)' alias=default
+23:09:24.084139 N    pid=566065 thread='Thread-2 (worker)' alias=default
+23:09:24.087456 C    pid=566066 thread='Thread-3 (worker)' alias=default
+23:09:24.088251 C    pid=566065 thread='Thread-2 (worker)' alias=default
+23:09:24.090502 N    pid=566067 thread='Thread-4 (worker)' alias=default
+23:09:24.093820 C    pid=566067 thread='Thread-4 (worker)' alias=default
+23:09:24.098388 TEST test_concurrent_bumps_no_duplicates_no_old_namespace (blog.tests_epoch.ConcurrentBumpTests.test_concurrent_bumps_no_duplicates_no_old_namespace) 
+23:09:24.665810 C    pid=565973 thread='MainThread' alias=default
+23:09:24.666079 TEST test_rollback_and_reapply_chain (blog.tests_epoch.MigrationChainTests.test_rollback_and_reapply_chain) 
+23:09:24.700712 N    pid=566068 thread='MainThread' alias=default
+23:09:25.268109 TEST test_rollback_and_reapply_chain (blog.tests_epoch.MigrationChainTests.test_rollback_and_reapply_chain) 
+23:09:25.792380 C    pid=566068 thread='MainThread' alias=default
+23:09:25.792580 TEST test_seed_idempotent_after_reapply (blog.tests_epoch.MigrationChainTests.test_seed_idempotent_after_reapply) 
+23:09:25.825523 N    pid=566070 thread='MainThread' alias=default
+23:09:26.250665 TEST test_seed_idempotent_after_reapply (blog.tests_epoch.MigrationChainTests.test_seed_idempotent_after_reapply) 
+23:09:26.809074 C    pid=566070 thread='MainThread' alias=default
+23:09:26.809341 TEST test_concurrent_restore_on_empty_table (blog.tests_epoch.ConcurrentRestoreTests.test_concurrent_restore_on_empty_table) 
+23:09:26.826651 N    pid=566077 thread='MainThread' alias=default
+23:09:26.859176 N    pid=566082 thread='Thread-6 (worker)' alias=default
+23:09:26.860611 N    pid=566083 thread='Thread-7 (worker)' alias=default
+23:09:26.863703 N    pid=566085 thread='Thread-8 (worker)' alias=default
+23:09:26.863900 N    pid=566084 thread='Thread-5 (worker)' alias=default
+23:09:26.870293 C    pid=566082 thread='Thread-6 (worker)' alias=default
+23:09:26.873901 C    pid=566085 thread='Thread-8 (worker)' alias=default
+23:09:26.875382 C    pid=566084 thread='Thread-5 (worker)' alias=default
+23:09:26.879090 C    pid=566083 thread='Thread-7 (worker)' alias=default
+23:09:26.883555 TEST test_concurrent_restore_on_empty_table (blog.tests_epoch.ConcurrentRestoreTests.test_concurrent_restore_on_empty_table) 
+23:09:27.404378 C    pid=566077 thread='MainThread' alias=default
+23:09:27.404573 TEST test_after_bump_same_context (blog.tests_epoch.RequestStartedIntegrationTests.test_after_bump_same_context) 
+23:09:27.426130 N    pid=566086 thread='MainThread' alias=default
+23:09:27.434913 TEST test_after_bump_same_context (blog.tests_epoch.RequestStartedIntegrationTests.test_after_bump_same_context) 
+23:09:27.969131 C    pid=566086 thread='MainThread' alias=default
+23:09:27.969255 TEST test_async_asend_resets_cache (blog.tests_epoch.RequestStartedIntegrationTests.test_async_asend_resets_cache) 
+23:09:27.988800 N    pid=566093 thread='MainThread' alias=default
+23:09:28.014675 LEAK pid=566094 thread='MainThread' alias=default
+23:09:28.021863 TEST test_async_asend_resets_cache (blog.tests_epoch.RequestStartedIntegrationTests.test_async_asend_resets_cache) 
+23:09:28.561565 C    pid=566093 thread='MainThread' alias=default
+23:09:28.561723 TEST test_outside_http_request (blog.tests_epoch.RequestStartedIntegrationTests.test_outside_http_request) 
+23:09:28.579981 N    pid=566097 thread='MainThread' alias=default
+23:09:28.586348 TEST test_outside_http_request (blog.tests_epoch.RequestStartedIntegrationTests.test_outside_http_request) 
+23:09:29.095561 C    pid=566097 thread='MainThread' alias=default
+23:09:29.095710 TEST test_sync_send_resets_cache (blog.tests_epoch.RequestStartedIntegrationTests.test_sync_send_resets_cache) 
+23:09:29.117374 N    pid=566098 thread='MainThread' alias=default
+23:09:29.129397 C    pid=566098 thread='MainThread' alias=default
+23:09:29.149235 N    pid=566100 thread='MainThread' alias=default
+23:09:29.150395 TEST test_sync_send_resets_cache (blog.tests_epoch.RequestStartedIntegrationTests.test_sync_send_resets_cache) 
+23:09:29.635389 C    pid=566100 thread='MainThread' alias=default
+23:09:29.653560 N    pid=566102 thread='MainThread' alias=default
+23:09:29.673223 C    pid=566102 thread='MainThread' alias=default
+23:09:29.696471 N    pid=566104 thread='MainThread' alias=__no_db__
+23:09:29.797730 C    pid=566104 thread='MainThread' alias=__no_db__
+=== УТЕЧКИ (NEWCONN без CLOSE): [(566094, 'MainThread')] ===

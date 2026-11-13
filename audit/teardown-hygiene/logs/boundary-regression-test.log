@@ -1,0 +1,11 @@
+Creating test database for alias 'default'...
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.092s
+
+OK
+Destroying test database for alias 'default'...
+Found 1 test(s).
+System check identified no issues (0 silenced).
+[test_runner]   terminating leaked own session pid=566463 state=idle backend_start=2026-11-14 02:10:44.718304+03:00 last_query='SELECT 1'
+[test_runner] test DB 'test_a1020391_django_radio' drained in ~0.0s (terminated=0); DROP без гонки

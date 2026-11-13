@@ -1,0 +1,145 @@
+Creating test database for alias 'default'...
+........................Page created: "Тестовый корень" id=4 content_type=wagtailcore.Page path=/test-root/
+Page created: "Тестовый пост" id=5 content_type=blog.BlogPage path=/test-root/cache-post/
+Page edited: "Тестовый пост" id=5 revision_id=1
+Published: "Тестовый пост" pk=5 revision_id=1
+.....................Page created: "Epoch home" id=6 content_type=wagtailcore.Page path=/epoch-home/
+Page created: "Epoch пост" id=7 content_type=blog.BlogPage path=/epoch-home/epoch-post/
+Page edited: "Epoch пост" id=7 revision_id=2
+Published: "Epoch пост" pk=7 revision_id=2
+.....Page created: "Seed home" id=8 content_type=wagtailcore.Page path=/seed-home/
+Page created: "Seed пост" id=9 content_type=blog.BlogPage path=/seed-home/seed-post/
+Page edited: "Seed пост" id=9 revision_id=3
+Published: "Seed пост" pk=9 revision_id=3
+.InvalidationEpoch недоступна (сбой БД): page cache безопасно обойдён
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/models.py", line 110, in get_epoch
+    return cls.objects.only("epoch").get(pk=1).epoch
+           ~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+Exception: db down
+....InvalidationEpoch pk=1 отсутствует: page cache безопасно обойдён (bypass). Восстановите строку миграцией 0039.
+....ssss...............Page created: "Контакты" id=10 content_type=blog.ContactPage path=/contact-3315304b/
+...Replay protection DB unavailable
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/models.py", line 645, in clean
+    UsedFormToken.objects.create(token_hash=token_hash)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1241, in _execute_mock_call
+    raise effect
+RuntimeError: db down
+............Replay protection: non-unique IntegrityError
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/tests_replay_http.py", line 280, in _fn
+    raise _Cause(code)
+blog.tests_replay_http.ReplayHTTPFlowTests.test_unique_violation_vs_other_integrity_error.<locals>._Cause: db
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/models.py", line 645, in clean
+    UsedFormToken.objects.create(token_hash=token_hash)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1247, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/tests_replay_http.py", line 282, in _fn
+    raise DjangoIntegrityError("db") from c
+django.db.utils.IntegrityError: db
+Replay protection: non-unique IntegrityError
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/tests_replay_http.py", line 280, in _fn
+    raise _Cause(code)
+blog.tests_replay_http.ReplayHTTPFlowTests.test_unique_violation_vs_other_integrity_error.<locals>._Cause: db
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/models.py", line 645, in clean
+    UsedFormToken.objects.create(token_hash=token_hash)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1247, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/opt/MyApps/wagtail/wagtail-blogs/blog/tests_replay_http.py", line 282, in _fn
+    raise DjangoIntegrityError("db") from c
+django.db.utils.IntegrityError: db
+................Page created: "San parent" id=11 content_type=wagtailcore.Page path=/san-parent/
+.Page created: "t" id=12 content_type=blog.BlogPage path=/san-parent/san-test/
+.Page created: "t2" id=13 content_type=blog.BlogPage path=/san-parent/san-test-2/
+.......Page created: "Blog index" id=14 content_type=blog.BlogIndexPage path=/blog-index-tests/
+Page created: "Pagination post 0" id=15 content_type=blog.BlogPage path=/blog-index-tests/pagination-post-0/
+Page edited: "Pagination post 0" id=15 revision_id=4
+Published: "Pagination post 0" pk=15 revision_id=4
+Page created: "Pagination post 1" id=16 content_type=blog.BlogPage path=/blog-index-tests/pagination-post-1/
+Page edited: "Pagination post 1" id=16 revision_id=5
+Published: "Pagination post 1" pk=16 revision_id=5
+Page created: "Pagination post 2" id=17 content_type=blog.BlogPage path=/blog-index-tests/pagination-post-2/
+Page edited: "Pagination post 2" id=17 revision_id=6
+Published: "Pagination post 2" pk=17 revision_id=6
+Page created: "Pagination post 3" id=18 content_type=blog.BlogPage path=/blog-index-tests/pagination-post-3/
+Page edited: "Pagination post 3" id=18 revision_id=7
+Published: "Pagination post 3" pk=18 revision_id=7
+Page created: "Pagination post 4" id=19 content_type=blog.BlogPage path=/blog-index-tests/pagination-post-4/
+Page edited: "Pagination post 4" id=19 revision_id=8
+Published: "Pagination post 4" pk=19 revision_id=8
+Page created: "Pagination post 5" id=20 content_type=blog.BlogPage path=/blog-index-tests/pagination-post-5/
+Page edited: "Pagination post 5" id=20 revision_id=9
+Published: "Pagination post 5" pk=20 revision_id=9
+Page created: "Pagination post 6" id=21 content_type=blog.BlogPage path=/blog-index-tests/pagination-post-6/
+Page edited: "Pagination post 6" id=21 revision_id=10
+Published: "Pagination post 6" pk=21 revision_id=10
+..Page created: "Earlier" id=22 content_type=blog.BlogPage path=/nav-earlier/
+Page created: "Same A" id=23 content_type=blog.BlogPage path=/nav-same-a/
+Page created: "Same B" id=24 content_type=blog.BlogPage path=/nav-same-b/
+Page created: "Later" id=25 content_type=blog.BlogPage path=/nav-later/
+...Page created: "Статья про паяльник" id=26 content_type=blog.BlogPage path=/solder/
+Page created: "Статья про светодиоды" id=27 content_type=blog.BlogPage path=/leds/
+Page created: "Заметка о походе" id=28 content_type=blog.BlogPage path=/hike/
+...Page created: "ranked-second" id=29 content_type=blog.BlogPage path=/ranked-second/
+Page edited: "ranked-second" id=29 revision_id=11
+Published: "ranked-second" pk=29 revision_id=11
+Page created: "ranked-first" id=30 content_type=blog.BlogPage path=/ranked-first/
+Page edited: "ranked-first" id=30 revision_id=12
+Published: "ranked-first" pk=30 revision_id=12
+......Found 159 test(s).
+System check identified no issues (0 silenced).
+[test_runner]   terminating leaked own session pid=573925 state=idle backend_start=2026-11-14 02:36:04.655226+03:00 last_query='SELECT 1'
+...Sendmail delivery failed: exit=75; stderr=temporary failure
+Sendmail delivery failed: exit=75; stderr=temporary failure
+.Sendmail delivery failed: sendmail timed out after 15s
+Sendmail delivery failed: sendmail timed out after 15s
+.................Page created: "Root" id=31 content_type=wagtailcore.Page path=/
+Page created: "Контакты" id=32 content_type=blog.ContactPage path=/contact-6298c402/
+......
+----------------------------------------------------------------------
+Ran 159 tests in 107.253s
+
+OK (skipped=4)
+Destroying test database for alias 'default'...
+[test_runner] foreign session on test DB 'test_a1020391_django_radio': pid=574012 state=idle backend_start=2026-11-13 23:36:12.934334+00:00 last_query='SELECT "blog_invalidationepoch"."id", "blog_invalidationepoch"."epoch" FROM "blog_invalidationepoch" WHERE "blog_invalid'
+[test_runner]   terminating leaked own session pid=574012 state=idle backend_start=2026-11-14 02:36:12.934334+03:00 last_query='SELECT "blog_invalidationepoch"."id", "blog_invalidationepoch"."epoch" FROM "blog_invalidationepoch" WHERE "blog_invalid'
+[test_runner] test DB 'test_a1020391_django_radio' drained in ~0.0s (terminated=1); DROP без гонки
