@@ -1,15 +1,34 @@
-"""Тестовый раннер Д68: запись Django Site для Host тестового клиента.
+"""Тестовый раннер Д68: Django Site для Host тестового клиента + диагностика
+teardown, строго в пределах тестовых БД ТЕКУЩЕГО запуска.
 
 CurrentSiteMiddleware (django.contrib.sites) резолвит сайт по Host запроса.
 Django-тестовый клиент ходит с Host "testserver"; в чистой установке среди
 записей django.contrib.sites.models.Site его нет, а SITE_ID глобально
 сознательно не задаётся: многосайтовый проект выбирает сайт по Host, и
 фиксированная запись в общих настройках подменяла бы этот выбор для всех
-доменов. Поэтому запись создаёт ТЕСТОВЫЙ раннер в каждой тестовой БД после
-миграций. Это инфраструктура тестов: dev/production настройки,
-wagtail.models.Site и маршрутизация трёх доменов не затрагиваются.
+доменов. Запись создаёт ТЕСТОВЫЙ раннер. Это инфраструктура тестов:
+dev/production настройки, wagtail.models.Site и маршрутизация трёх доменов
+не затрагиваются.
 
-Подключение: TEST_RUNNER в vsproject/settings/test.py.
+Область действия (Д68-Б, замечание координатора — блокирующее):
+все записи и диагностика ограничены соединениями, которые ЭТОТ запуск
+переключил на тестовые БД. Список берётся из old_config — значения,
+возвращаемого django.test.utils.setup_databases. Проверено по исходникам
+Django 6.0.9 (django/test/utils.py, django/test/runner.py):
+- run_tests передаёт setup_databases aliases=get_databases(suite) — только
+  алиасы, используемые найденными тестами; get_databases явно пропускает
+  неиспользуемые ("Skipping setup of unused database(s)"), и их соединения
+  продолжают смотреть в РЕАЛЬНЫЕ БД;
+- old_config — список (connection, original_name, is_primary) ровно для
+  переключённых соединений: первичный получил create_test_db, остальные
+  с той же сигнатурой настроены set_as_test_mirror на тестовую БД
+  первичного; алиасы с TEST["MIRROR"] в old_config отсутствуют — они тоже
+  направлены на тестовую БД своего зеркала.
+Поэтому алиас, настроенный в settings.local, но не используемый тестами,
+в old_config не попадает — раннер не обращается к нему вовсе.
+
+Подключение: TEST_RUNNER в vsproject/settings/test.py. Конфигурация
+проверки области действия: vsproject/settings/test_extra_alias.py.
 """
 from django.test.runner import DiscoverRunner
 
@@ -19,13 +38,21 @@ TEST_CLIENT_HOST = "testserver"
 class SiteTestRunner(DiscoverRunner):
     def setup_databases(self, **kwargs):
         old_config = super().setup_databases(**kwargs)
-        # К этому моменту DiscoverRunner.setup_databases переключил все
-        # настроенные алиасы на тестовые БД и применил миграции.
         from django.contrib.sites.models import Site
-        from django.db import connections
 
-        for alias in connections:
-            Site.objects.using(alias).get_or_create(
+        for connection, original_name, is_primary in old_config:
+            # Запись создаёт первичный алиас каждой созданной тестовой БД
+            # (вторичные той же сигнатуры смотрят на ту же тестовую БД).
+            if not is_primary:
+                continue
+            test_name = connection.settings_dict["NAME"]
+            if test_name == original_name:
+                # Защита в глубину: соединение не переключено на тестовую БД —
+                # писать в него нельзя ни при каких условиях.
+                print(f"[test_runner] alias {connection.alias!r} still points "
+                      f"at {original_name!r} (not switched); testserver skip")
+                continue
+            Site.objects.using(connection.alias).get_or_create(
                 domain=TEST_CLIENT_HOST,
                 defaults={"name": f"{TEST_CLIENT_HOST} (Django test client)"},
             )
@@ -33,48 +60,37 @@ class SiteTestRunner(DiscoverRunner):
 
     def teardown_databases(self, old_config):
         try:
-            self._terminate_foreign_sessions()
-        except Exception as exc:  # noqa: BLE001 — teardown не должен маскировать вердикт
+            self._print_foreign_sessions(old_config)
+        except Exception as exc:  # noqa: BLE001 — диагностика не маскирует вердикт
             print(f"[test_runner] teardown diagnostics failed: "
                   f"{type(exc).__name__}: {exc}")
         return super().teardown_databases(old_config)
 
-    def _terminate_foreign_sessions(self):
-        """Завершить ПОСТОРОННИЕ сессии тестовых БД перед DROP.
+    def _print_foreign_sessions(self, old_config):
+        """Read-only диагностика посторонних сессий ТОЛЬКО тестовых БД
+        текущего запуска (PostgreSQL).
 
-        Сторонняя сессия (соединение из потока теста, не закрытое
-        connection.close()) ломает DROP DATABASE с ObjectInUse: вердикт
-        сюита зелёный, а exit code всего процесса — 1. Тестовая БД —
-        расходный артефакт прогона, завершение посторонних сессий в ней
-        безопасно и не касается production. Диагностика печатает PID,
-        состояние и последний запрос каждой такой сессии — это и есть
-        фиксация причины утечки соединений.
+        pg_terminate_backend НЕ выполняется (Д68-Б): причина ObjectInUse не
+        установлена — три чистых прогона после исправления тестов прошли
+        без рецидива, и автоматическое завершение посторонних подключений
+        не обосновано. Если ObjectInUse повторится, эта диагностика назовёт
+        pid, состояние и последний запрос виновной сессии — тогда решение
+        о завершении будет предметным и адресным.
         """
-        from django.db import connections
-
-        for alias in connections:
-            connection = connections[alias]
-            if connection.vendor != "postgresql":
+        for connection, original_name, is_primary in old_config:
+            if not is_primary or connection.vendor != "postgresql":
                 continue
-            test_db = connection.settings_dict.get("NAME")
-            if not test_db:
-                continue
+            test_name = connection.settings_dict["NAME"]
+            if test_name == original_name:
+                continue  # не переключено — не диагностируем
             with connection.cursor() as cursor:
                 cursor.execute(
                     "SELECT pid, state, query FROM pg_stat_activity "
                     "WHERE datname = %s AND pid <> pg_backend_pid()",
-                    [test_db],
+                    [test_name],
                 )
                 stragglers = cursor.fetchall()
-            if not stragglers:
-                continue
             for pid, state, query in stragglers:
                 snippet = (query or "").strip().replace("\n", " ")[:120]
-                print(f"[test_runner] straggler session on {test_db}: "
+                print(f"[test_runner] foreign session on test DB {test_name!r}: "
                       f"pid={pid} state={state} last_query={snippet!r}")
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
-                    "WHERE datname = %s AND pid <> pg_backend_pid()",
-                    [test_db],
-                )
