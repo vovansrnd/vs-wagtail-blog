@@ -83,19 +83,17 @@ ORM через `sync_to_async` без обхода async-защиты, соед�
   прогона, все с `application_name='vs-wagtail-tests-565391-5a203f24'`
   (монитор `tools/label_monitor.py`).
 
-## 3. Граница регрессионного теста (пробел В)
+## 3. Граница регрессионного теста (пробел В) — закрыт
 
-`blog/tests_runner_teardown.py` проверяет совпадение меток через
-`connection.settings_dict["OPTIONS"]` — реальная серверная метка
-Django-соединения подтверждена отдельно (`logs/label-capture.log`).
-Рекомендация координатора: добавить в тест утверждение через
-`pg_stat_activity` по живому соединению — включено в `reproduce.md`
-как следующий шаг (текущий тест факт серверной метки покрывает
-монитором на весь прогон).
+`blog/tests_runner_teardown.py` теперь содержит серверное утверждение:
+живая сессия TestCase проверяется по `pg_stat_activity` —
+`application_name == метка запуска` (ветка agent/runner-report-fixes).
+Монитор на весь прогон остаётся дополнительным свидетельством
+(`logs/label-capture.log`).
 
-## 4. Дефекты раннера, найденные координатором (подтверждены инспекцией)
+## 4. Дефекты раннера, найденные координатором — исправлены в ветке
 
-На `main@22926cee`, `vsproject/test_runner.py`:
+Ветка `agent/runner-report-fixes` (aed2116b), на `main@22926cee`:
 
 1. **Отчёт дренажа неполон**: `_drain_test_db` при таймауте печатает
    WARNING «own sessions still present», но не возвращает выжившие
