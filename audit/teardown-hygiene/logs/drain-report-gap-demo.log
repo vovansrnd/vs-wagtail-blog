@@ -1,0 +1,7 @@
+демо: утёкшая сессия pid=570248 на d68_gap_demo
+[test_runner]   terminating leaked own session pid=570248 state=idle backend_start=2026-11-14 02:22:51.862646+03:00 last_query='SELECT 1'
+  [имитация] pg_terminate_backend не сработал — сессия жива
+[test_runner] WARNING: own sessions still present on 'd68_gap_demo': [570248]
+отчёт _drain_test_db: terminated=[570248] foreign=[] — ПОЛЯ собственных выживших pid'ов в отчёте НЕТ
+[test_runner] test DB 'd68_gap_demo' drained in ~0.0s (terminated=1); DROP без гонки
+ИТОГ: сообщение 'DROP без гонки' напечатано, но сессия 570248 всё ещё жива (closed=0) — DROP впоследствии упадёт с ObjectInUse; отчёт не позволил это увидеть
