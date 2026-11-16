@@ -107,7 +107,13 @@ class RunnerDrainScopingTests(TestCase):
                              "на сервере (pg_stat_activity)")
         finally:
             # закрытия — только ПОСЛЕ всех проверок (это сценарий теста,
-            # а не дренажа)
+            # а не дренажа); own закрывается всегда — даже если серверный
+            # backend уже завершён pg_terminate_backend (клиентский объект
+            # остаётся и должен быть закрыт явно)
+            try:
+                own.close()
+            except psycopg2.Error:
+                pass
             foreign.close()
             pg.close()
         # после явного клиентского закрытия объект считывается как закрытый

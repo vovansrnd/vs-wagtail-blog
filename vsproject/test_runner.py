@@ -33,13 +33,15 @@ database(s)") и их соединения продолжают смотреть
 сообщает о неустранённой блокировке, и DROP честно завершается ошибкой
 ObjectInUse. Проверка границы — blog/tests_runner_teardown.py.
 
-Улики Д68-Т (teardown-утечка): idle-сессия с последним запросом SELECT к
-blog_invalidationepoch, живущая до выхода процесса (минимальный
-воспроизводитель — квартет классов в blog.tests_epoch; соединение
-переоткрывается внутри test_async_asend_resets_cache после
-request_started.asend() и ускользает от штатных путей закрытия), и гонка
-close→DROP — backend собственного соединения ещё не завершился к моменту
-DROP DATABASE.
+Улики Д68-Т (teardown-утечка, первопричина устранена на уровне теста —
+agent/async-epoch-test-rewrite: test_async_asend_resets_cache переписан
+без обхода async-защиты и больше не оставляет соединений; на базовом
+коммите ff296f9 без дренажа — 0 утечек): историческая утечка была
+idle-сессией с последним запросом SELECT к blog_invalidationepoch,
+живущей до выхода процесса (минимальный воспроизводитель — квартет
+классов в blog.tests_epoch), плюс гонка close→DROP — backend
+собственного соединения ещё не завершился к моменту DROP DATABASE.
+Дренаж остаётся страховкой этих явлений и будущих утечек.
 
 Подключение: TEST_RUNNER в vsproject/settings/test.py. Конфигурация
 проверки области действия: vsproject/settings/test_extra_alias.py.
