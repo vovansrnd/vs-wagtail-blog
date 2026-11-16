@@ -9,7 +9,7 @@ Page edited: "Seed пост" id=7 revision_id=2
 Published: "Seed пост" pk=7 revision_id=2
 .InvalidationEpoch недоступна (сбой БД): page cache безопасно обойдён
 Traceback (most recent call last):
-  File "/opt/MyApps/wagtail/d68audit-base/blog/models.py", line 110, in get_epoch
+  File "<base_worktree>/blog/models.py", line 110, in get_epoch
     return cls.objects.only("epoch").get(pk=1).epoch
            ~~~~~~~~~~~~~~~~^^^^^^^^^
   File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
