@@ -548,43 +548,79 @@ class RequestStartedIntegrationTests(FlushCascadeMixin, TransactionTestCase):
         self.assertEqual(get_blog_cache_epoch(), "sig-updated")
 
     def test_async_asend_resets_cache(self):
-        """ASGI-путь: request_started.asend() — sync-приёмник через
-        sync_to_async выполняется в executor-потоке, ContextVar.set() там
-        НЕ влияет на вызывающий task-контекст. Это КОРЕКТНО: в ASGI каждый
-        запрос — отдельная задача с собственным контекстом, ContextVar
-        естественным образом изолирована per-request без сигнала.
-        Проверяем: asend не ломает caller'а, а следующий запрос (новый
-        контекст) получает свежую эпоху."""
+        """ASGI: настоящий request_started.asend() и фактическая семантика
+        ContextVar на границе sync/async (проверено эмпирически, Д68-Т).
+
+        Все ORM-операции — через sync_to_async, БЕЗ обхода async-защиты
+        (DJANGO_ALLOW_ASYNC_UNSAFE не устанавливается). Каждое соединение
+        закрывается в том же sync-контексте, где открыто (утечка Д68-Т:
+        соединения потоков-исполнителей не закрываются сами).
+
+        Фактическая семантика Django/asgiref (зафиксирована тестом):
+        1) копия-внутрь: sync-контекст наследует ContextVar вызывающей
+           задачи (проба-маркер видна в sync-контексте);
+        2) обратной пропагации нет: сброс в sync-приёмнике сигнала
+           остаётся в копии контекста потока-исполнителя и НЕ меняет
+           ContextVar вызывающей задачи;
+        3) функциональная корректность ASGI: каждая новая задача
+           начинает с чистого ContextVar и читает актуальную эпоху из БД —
+           это проверяется в ОТДЕЛЬНОЙ задаче (новый «запрос») без
+           ручного сброса кэша.
+        """
         import asyncio
+
+        from asgiref.sync import sync_to_async
         from django.core.signals import request_started
-        from unittest import mock
+        from django.db import connection
+
+        def _read_epoch_and_close():
+            """Чтение эпохи; соединение закрывается в своём sync-контексте."""
+            epoch = get_blog_cache_epoch()
+            connection.close()
+            return epoch
+
+        def _bump_and_close(new_epoch):
+            """Обновление эпохи в БД + закрытие соединения."""
+            updated = InvalidationEpoch.objects.filter(pk=1).update(
+                epoch=new_epoch)
+            connection.close()
+            return updated
 
         async def scenario():
-            _reset_epoch_cache()
-            e1 = get_blog_cache_epoch()
+            _reset_epoch_cache()  # чистый ContextVar вызывающей задачи
+            e1 = await sync_to_async(_read_epoch_and_close)()
             self.assertEqual(e1, "sig-base")
-            InvalidationEpoch.objects.filter(pk=1).update(epoch="sig-async")
-            self.assertEqual(get_blog_cache_epoch(), e1,
-                             "до сигнала кэш ещё старый (ожидаемо)")
-            # настоящий async-сигнал request_started через asend()
+            await sync_to_async(_bump_and_close)("sig-async")
+            # Проба копии-внутрь: маркер caller'а виден в sync-контексте.
+            _epoch_var.set("caller-marker")
+            inherited = await sync_to_async(_epoch_var.get)()
+            self.assertEqual(inherited, "caller-marker",
+                             "sync-контекст наследует ContextVar caller'а")
+            # Настоящий сигнал: sync-приёмник (_reset_epoch_cache) выполняется
+            # в копии контекста потока-исполнителя.
             await request_started.asend(sender=None)
-            # sync-приёмник выполнился в executor-потоке: ContextVar
-            # вызывающей задачи НЕ сброшен (asgiref Local/ContextVar
-            # изоляция между executor-потоком и caller'ом). Это корректно:
-            # в ASGI каждый запрос = отдельная задача = свежий контекст.
-            after_signal = _epoch_var.get()
-            # свежее чтение в новом контексте (симуляция нового запроса)
-            _reset_epoch_cache()
-            return after_signal, get_blog_cache_epoch()
+            # Фактическое состояние контекста caller'а после сигнала.
+            return _epoch_var.get()
 
-        with mock.patch.dict(os.environ, {"DJANGO_ALLOW_ASYNC_UNSAFE": "true"}):
-            after_signal, fresh = asyncio.run(scenario())
-        # В ASGI ContextVar может быть сброшен или нет — зависит от
-        # asgiref-путей. Главное: новый контекст (fresh) видит актуальную БД.
-        self.assertEqual(fresh, "sig-async",
-                         "после reset новый контекст должен читать актуальную БД")
-
-
+        after_signal = asyncio.run(scenario())
+        # Обратной пропагации нет: сброс приёмника не затронул caller'а.
+        self.assertEqual(
+            after_signal, "caller-marker",
+            "sync-приёмник сигнала не должен изменять ContextVar "
+            "вызывающей задачи (его сброс остаётся в копии контекста)")
+        # Функциональная корректность ASGI: новая задача стартует с ContextVar
+        # по умолчанию (пустой контекст — точная имитация нового запроса), и
+        # БЕЗ ручного сброса кэша читает актуальную эпоху из БД. Пустой
+        # контекст делает чтение детерминированным при любом порядке тестов
+        # (ContextVar не переезжает между asyncio.run и из ранее выполненных
+        # тестов того же потока).
+        import contextvars as _cvars
+        fresh = asyncio.run(
+            sync_to_async(lambda: _cvars.Context().run(_read_epoch_and_close))())
+        self.assertEqual(
+            fresh, "sig-async",
+            "новая задача обязана видеть актуальную эпоху БД "
+            "(чистый ContextVar на старте задачи)")
     def test_outside_http_request(self):
         """get_blog_cache_epoch() работает вне HTTP-запроса (management command)."""
         _reset_epoch_cache()
