@@ -528,7 +528,9 @@ class RequestStartedIntegrationTests(FlushCascadeMixin, TransactionTestCase):
 
     Проверяет:
     - sync send() сигнал сбрасывает ContextVar;
-    - async asend() сигнал сбрасывает ContextVar (Django ASGI);
+    - async asend() НЕ меняет ContextVar вызывающей задачи: sync-приёмники
+      сигнала выполняются в ДОЧЕРНЕЙ задаче (asyncio.gather создаёт задачу
+      для sync_send), их изменения контекста остаются в дочерней задаче;
     - get_blog_cache_epoch() вне HTTP-запроса работает;
     - после bump() в том же контексте get_blog_cache_epoch() возвращает новую эпоху.
     """
