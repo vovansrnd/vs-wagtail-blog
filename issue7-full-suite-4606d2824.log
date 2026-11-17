@@ -1,5 +1,6 @@
-=== Окружение: Python 3.14.4 / Django 6.0.9 / Wagtail 8.1 / PostgreSQL 14.15 (сервер), локальный клон vs-wagtail-blog, HEAD 4606d2824 ===
-=== Полный stdout полного тестового прогона (manage.py test --noinput) ===
+=== Окружение: Python 3.14.4 / Django 6.0.9 / Wagtail 8.1 / PostgreSQL 14.15 (сервер); локальный клон vs-wagtail-blog, HEAD 4606d2824 ===
+=== Полный stdout полного тестового прогона (manage.py test --noinput), включая фактический exit-код ===
+=== Окружение: Python 3.14.4 / Django 6.0.9 / Wagtail 8.1 / PostgreSQL 14.15 (сервер); HEAD 4606d2824cd492221c611a05884eb4e0fc2e1404 ===
 Creating test database for alias 'default'...
 ........................Page created: "Тестовый корень" id=4 content_type=wagtailcore.Page path=/test-root/
 Page created: "Тестовый пост" id=5 content_type=blog.BlogPage path=/test-root/cache-post/
@@ -28,7 +29,7 @@ Traceback (most recent call last):
     raise effect
 Exception: db down
 ....InvalidationEpoch pk=1 отсутствует: page cache безопасно обойдён (bypass). Восстановите строку миграцией 0039.
-....ssss...............Page created: "Контакты" id=10 content_type=blog.ContactPage path=/contact-7e1e3a80/
+....ssss...............Page created: "Контакты" id=10 content_type=blog.ContactPage path=/contact-5deaac57/
 ...Replay protection DB unavailable
 Traceback (most recent call last):
   File "/opt/MyApps/wagtail/wagtail-blogs/blog/models.py", line 645, in clean
@@ -129,17 +130,18 @@ Page edited: "ranked-first" id=30 revision_id=12
 Published: "ranked-first" pk=30 revision_id=12
 ......Found 160 test(s).
 System check identified no issues (0 silenced).
-[test_runner]   terminating leaked own session pid=264215 state=idle backend_start=2026-11-17 19:37:55.251483+03:00 last_query='SELECT 1'
+[test_runner]   terminating leaked own session pid=270081 state=idle backend_start=2026-11-17 20:35:21.661871+03:00 last_query='SELECT 1'
 ...Sendmail delivery failed: exit=75; stderr=temporary failure
 Sendmail delivery failed: exit=75; stderr=temporary failure
 .Sendmail delivery failed: sendmail timed out after 15s
 Sendmail delivery failed: sendmail timed out after 15s
 ..................Page created: "Root" id=31 content_type=wagtailcore.Page path=/
-Page created: "Контакты" id=32 content_type=blog.ContactPage path=/contact-3ff74dbf/
+Page created: "Контакты" id=32 content_type=blog.ContactPage path=/contact-2d321b2b/
 ......
 ----------------------------------------------------------------------
-Ran 160 tests in 109.316s
+Ran 160 tests in 108.026s
 
 OK (skipped=4)
 Destroying test database for alias 'default'...
 [test_runner] test DB 'test_a1020391_django_radio' drained in ~0.0s (terminated=0); DROP без гонки
+=== EXIT=0 ===
