@@ -1,14 +1,17 @@
 """Тесты Этапа 2 (durable epoch) — вытеснение, конкурентность, сигналы, миграция 0039.
 
-Квартет ConcurrentBumpTests + MigrationChainTests + ConcurrentRestoreTests +
-RequestStartedIntegrationTests в ОДНОМ процессе — минимальный воспроизводитель
-teardown-утечки Д68-Т: reopened-коннект внутри test_async_asend_resets_cache
-(второй get_blog_cache_epoch после asend) ускользает от штатных путей закрытия
-и живёт до выхода процесса; сигнатура — idle-сессия с последним SELECT к
-blog_invalidationepoch. Тест соединение сам не закрывает: ускользнувший
-коннект остаётся незакрытым в процессе; его диагностирует и завершает
-дренаж раннера — vsproject/test_runner.py (teardown_databases), строго в
-пределах сессий с меткой запуска (application_name).
+Историческая утечка teardown-соединения (Д68-Т) была индуцирована прежней
+конструкцией test_async_asend_resets_cache (синхронный ORM внутри
+asyncio.run с обходом async-защиты); после переписывания теста утечка
+устранена — на базовом коммите ff296f9 БЕЗ дренажа квартет проходит
+чисто (улики и логи: audit/teardown-hygiene/ в досье-ветке
+agent/teardown-audit-dossier). Дренаж раннера остаётся страховкой гонки
+close→DROP и будущих утечек. Семантика ContextVar на границе sync/async:
+sync-приёмники сигналов Django выполняются в ДОЧЕРНЕЙ задаче
+(asyncio.gather создаёт задачу для sync_send) — их изменения контекста
+остаются в дочерней задаче и не затрагивают caller'а; прямой
+sync_to_async (без дочерней задачи) восстанавливает изменения в контексте
+caller'а. Оба пути закреплены тестами ниже.
 """
 import os
 import threading
@@ -525,7 +528,9 @@ class RequestStartedIntegrationTests(FlushCascadeMixin, TransactionTestCase):
 
     Проверяет:
     - sync send() сигнал сбрасывает ContextVar;
-    - async asend() сигнал сбрасывает ContextVar (Django ASGI);
+    - async asend() НЕ меняет ContextVar вызывающей задачи: sync-приёмники
+      сигнала выполняются в ДОЧЕРНЕЙ задаче (asyncio.gather создаёт задачу
+      для sync_send), их изменения контекста остаются в дочерней задаче;
     - get_blog_cache_epoch() вне HTTP-запроса работает;
     - после bump() в том же контексте get_blog_cache_epoch() возвращает новую эпоху.
     """
@@ -548,43 +553,97 @@ class RequestStartedIntegrationTests(FlushCascadeMixin, TransactionTestCase):
         self.assertEqual(get_blog_cache_epoch(), "sig-updated")
 
     def test_async_asend_resets_cache(self):
-        """ASGI-путь: request_started.asend() — sync-приёмник через
-        sync_to_async выполняется в executor-потоке, ContextVar.set() там
-        НЕ влияет на вызывающий task-контекст. Это КОРЕКТНО: в ASGI каждый
-        запрос — отдельная задача с собственным контекстом, ContextVar
-        естественным образом изолирована per-request без сигнала.
-        Проверяем: asend не ломает caller'а, а следующий запрос (новый
-        контекст) получает свежую эпоху."""
+        """ASGI: request_started.asend() выполняет sync-приёмники в
+        ДОЧЕРНЕЙ задаче (asyncio.gather создаёт задачу для sync_send;
+        Django 6.0, dispatcher.asend) — восстановление контекста остаётся
+        в дочерней задаче и НЕ меняет ContextVar вызывающей задачи.
+        Новый «запрос» проверяется через настоящую новую задачу с пустым
+        контекстом (asyncio.create_task(..., context=Context())).
+
+        Все ORM-операции — через sync_to_async, БЕЗ обхода async-защиты;
+        соединения закрываются в том же sync-контексте, где открыты
+        (try/finally).
+        """
         import asyncio
+
+        import contextvars as _cvars
+        from asgiref.sync import sync_to_async
         from django.core.signals import request_started
-        from unittest import mock
+        from django.db import connection
 
-        async def scenario():
+        def _read_epoch_and_close():
+            """Чтение эпохи; соединение закрывается в своём sync-контексте."""
+            try:
+                return get_blog_cache_epoch()
+            finally:
+                connection.close()
+
+        def _bump_and_close(new_epoch):
+            """Обновление эпохи в БД; соединение закрывается в контексте."""
+            try:
+                return InvalidationEpoch.objects.filter(pk=1).update(
+                    epoch=new_epoch)
+            finally:
+                connection.close()
+
+        async def main():
             _reset_epoch_cache()
-            e1 = get_blog_cache_epoch()
+            e1 = await sync_to_async(_read_epoch_and_close)()
             self.assertEqual(e1, "sig-base")
-            InvalidationEpoch.objects.filter(pk=1).update(epoch="sig-async")
-            self.assertEqual(get_blog_cache_epoch(), e1,
-                             "до сигнала кэш ещё старый (ожидаемо)")
-            # настоящий async-сигнал request_started через asend()
+            await sync_to_async(_bump_and_close)("sig-async")
+            # asend: sync-приёмники в дочерней задаче gather'а — их сброс
+            # не меняет ContextVar вызывающей задачи.
+            _epoch_var.set("before-asend")
             await request_started.asend(sender=None)
-            # sync-приёмник выполнился в executor-потоке: ContextVar
-            # вызывающей задачи НЕ сброшен (asgiref Local/ContextVar
-            # изоляция между executor-потоком и caller'ом). Это корректно:
-            # в ASGI каждый запрос = отдельная задача = свежий контекст.
-            after_signal = _epoch_var.get()
-            # свежее чтение в новом контексте (симуляция нового запроса)
+            self.assertEqual(_epoch_var.get(), "before-asend",
+                             "asend не должен менять ContextVar caller'а: "
+                             "приёмники выполняются в дочерней задаче")
+            # Новый «запрос» — настоящая новая задача с пустым контекстом
+            # (как ASGI-запрос): чистый ContextVar → актуальная эпоха из БД.
+            task = asyncio.create_task(
+                sync_to_async(_read_epoch_and_close)(),
+                context=_cvars.Context())
+            return await task
+
+        fresh = asyncio.run(main())
+        self.assertEqual(
+            fresh, "sig-async",
+            "новая задача с пустым контекстом обязана видеть актуальную "
+            "эпоху БД (ContextVar по умолчанию)")
+
+    def test_direct_sync_to_async_propagates_reset(self):
+        """Контроль изоляции: ПРЯМОЙ await sync_to_async(...) (без дочерней
+        задачи) восстанавливает изменения ContextVar в контексте
+        вызывающей задачи — в отличие от request_started.asend(), где
+        приёмники уходят в дочернюю задачу gather'а.
+
+        Контрольный эксперимент Д68-Т (эмпирически):
+        - прямой sync_to_async(_reset_epoch_cache)() → ContextVar
+          caller'а становится None (пропагация ЕСТЬ);
+        - request_started.asend() → ContextVar caller'а не меняется
+          (пропагации НЕТ — граница asyncio.Task).
+        """
+        import asyncio
+
+        from asgiref.sync import sync_to_async
+        from django.db import connection
+
+        def _reset_and_close():
+            try:
+                _reset_epoch_cache()
+            finally:
+                connection.close()
+
+        async def main():
             _reset_epoch_cache()
-            return after_signal, get_blog_cache_epoch()
+            _epoch_var.set("before-direct")
+            await sync_to_async(_reset_and_close)()
+            return _epoch_var.get()
 
-        with mock.patch.dict(os.environ, {"DJANGO_ALLOW_ASYNC_UNSAFE": "true"}):
-            after_signal, fresh = asyncio.run(scenario())
-        # В ASGI ContextVar может быть сброшен или нет — зависит от
-        # asgiref-путей. Главное: новый контекст (fresh) видит актуальную БД.
-        self.assertEqual(fresh, "sig-async",
-                         "после reset новый контекст должен читать актуальную БД")
-
-
+        self.assertIsNone(
+            asyncio.run(main()),
+            "прямой sync_to_async восстанавливает изменения ContextVar "
+            "в контексте caller'а (нет границы asyncio.Task)")
     def test_outside_http_request(self):
         """get_blog_cache_epoch() работает вне HTTP-запроса (management command)."""
         _reset_epoch_cache()
