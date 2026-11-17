@@ -33,9 +33,11 @@
    соединение открывается внутри `test_async_asend_resets_cache`
    (после `asend`), два MainThread-коннекта `default` живы одновременно,
    утечка не закрывается до выхода процесса. **ПОСЛЕ переписывания теста**
-   — `logs/base-ff296f9-rewritten-{async,quartet-r3-1,2}.log`: тест-одиночка
-   и квартет на ff296f9 БЕЗ дренажа — **exit=0, 0 foreign session, 0
-   сессий на сервере** — утечка была индуцирована тестом.
+   — `logs/base-ff296f9-rewritten-async-r3.log` (тест-одиночка) и
+   `logs/base-ff296f9-rewritten-quartet-r3-1.log`,
+   `logs/base-ff296f9-rewritten-quartet-r3-2.log` (квартет) на ff296f9
+   БЕЗ дренажа — **exit=0, 0 foreign session, 0 сессий на сервере** —
+   утечка была индуцирована тестом.
 5. **Чужая сессия** — `logs/no-label-foreign-scenario.log`,
    `logs/parallel-run-A/B.log`, `logs/boundary-regression-test.log`:
    сессии без метки запуска (параллельный запуск, диагностика) не
@@ -70,5 +72,10 @@
   владельца**; для строгой модели угроз требуется отдельное решение.
 - Дефекты раннера (отчёт дренажа, boolean terminate, scope метки) —
   исправлены в ветке agent/runner-report-fixes (aed2116b) и ждут слияния.
-- Семантика ContextVar зафиксирована для asgiref 3.13.0 + Python 3.14;
-  при обновлении asgiref ожидание теста перенастроить.
+- Семантика ContextVar объясняется границей задачи Django: asend
+  выполняет sync-приёмники в ДОЧЕРНЕЙ задаче (asyncio.gather создаёт
+  задачу для sync_send), её контекст — копия родительского, и
+  восстановление остаётся в дочерней задаче; ContextVar родителя
+  не меняется. Подтверждено контрольным тестом
+  test_direct_sync_to_async_propagates_reset (прямой sync_to_async
+  пропагирует, asend — нет).
