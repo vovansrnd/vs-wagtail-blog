@@ -96,9 +96,24 @@ class RunnerDrainScopingTests(TestCase):
                             "сессия TestCase не должна затрагиваться дренажем")
             with connection.cursor() as cur:
                 cur.execute("SELECT 1")
+            # серверный факт: живая сессия TestCase несёт метку запуска
+            # в pg_stat_activity (Д68-Т, ревизия 3: проверка реальной метки)
+            with pg.cursor() as cur:
+                cur.execute("SELECT application_name FROM pg_stat_activity "
+                            "WHERE pid = %s", [wrapper_pid])
+                server_label = cur.fetchone()[0]
+            self.assertEqual(server_label, run_label,
+                             "сессия TestCase должна нести метку запуска "
+                             "на сервере (pg_stat_activity)")
         finally:
             # закрытия — только ПОСЛЕ всех проверок (это сценарий теста,
-            # а не дренажа)
+            # а не дренажа); own закрывается всегда — даже если серверный
+            # backend уже завершён pg_terminate_backend (клиентский объект
+            # остаётся и должен быть закрыт явно)
+            try:
+                own.close()
+            except psycopg2.Error:
+                pass
             foreign.close()
             pg.close()
         # после явного клиентского закрытия объект считывается как закрытый

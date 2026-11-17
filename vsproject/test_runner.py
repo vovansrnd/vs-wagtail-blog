@@ -33,13 +33,15 @@ database(s)") и их соединения продолжают смотреть
 сообщает о неустранённой блокировке, и DROP честно завершается ошибкой
 ObjectInUse. Проверка границы — blog/tests_runner_teardown.py.
 
-Улики Д68-Т (teardown-утечка): idle-сессия с последним запросом SELECT к
-blog_invalidationepoch, живущая до выхода процесса (минимальный
-воспроизводитель — квартет классов в blog.tests_epoch; соединение
-переоткрывается внутри test_async_asend_resets_cache после
-request_started.asend() и ускользает от штатных путей закрытия), и гонка
-close→DROP — backend собственного соединения ещё не завершился к моменту
-DROP DATABASE.
+Улики Д68-Т (teardown-утечка, первопричина устранена на уровне теста —
+agent/async-epoch-test-rewrite: test_async_asend_resets_cache переписан
+без обхода async-защиты и больше не оставляет соединений; на базовом
+коммите ff296f9 без дренажа — 0 утечек): историческая утечка была
+idle-сессией с последним запросом SELECT к blog_invalidationepoch,
+живущей до выхода процесса (минимальный воспроизводитель — квартет
+классов в blog.tests_epoch), плюс гонка close→DROP — backend
+собственного соединения ещё не завершился к моменту DROP DATABASE.
+Дренаж остаётся страховкой этих явлений и будущих утечек.
 
 Подключение: TEST_RUNNER в vsproject/settings/test.py. Конфигурация
 проверки области действия: vsproject/settings/test_extra_alias.py.
@@ -74,6 +76,16 @@ class SiteTestRunner(DiscoverRunner):
             options["application_name"] = self._run_app_name
             settings_dict["OPTIONS"] = options
         old_config = super().setup_databases(**kwargs)
+        # Сузить область метки: снять её с алиасов, НЕ используемых этим
+        # запуском (их соединения — если кто-то их откроет — не должны
+        # попадать под terminate). Используемые алиасы — все записи
+        # old_config (первичные и зеркала той же сигнатуры).
+        used_aliases = {conn.alias for conn, _, _ in old_config}
+        for alias in connections:
+            if alias not in used_aliases:
+                options = connections[alias].settings_dict.get("OPTIONS") or {}
+                options.pop("application_name", None)
+                connections[alias].settings_dict["OPTIONS"] = options
         # К этому моменту DiscoverRunner.setup_databases переключил
         # используемые алиасы на тестовые БД и применил миграции.
         from django.contrib.sites.models import Site
@@ -164,6 +176,7 @@ class SiteTestRunner(DiscoverRunner):
             try:
                 connection.close()  # наш backend начинает завершаться
                 report = self._drain_test_db(pg, test_name, self._run_app_name)
+                elapsed = round(time.monotonic() - report["deadline"], 1)
                 if report["foreign"]:
                     print(f"[test_runner] WARNING: unresolved foreign session(s) "
                           f"on {test_name!r} — раннер завершает только сессии "
@@ -174,8 +187,11 @@ class SiteTestRunner(DiscoverRunner):
                         print(f"[test_runner]   foreign pid={pid} state={state} "
                               f"application_name={app!r} backend_start={backend_start} "
                               f"last_query={snippet!r}")
-                else:
-                    elapsed = round(time.monotonic() - report["deadline"], 1)
+                if report["own_remaining"]:
+                    print(f"[test_runner] WARNING: собственные сессии НЕ "
+                          f"завершились дренажем ({report['own_remaining']}) — "
+                          f"DROP завершится ошибкой ObjectInUse")
+                if not report["foreign"] and not report["own_remaining"]:
                     print(f"[test_runner] test DB {test_name!r} drained in "
                           f"~{elapsed}s (terminated={len(report['terminated'])}); "
                           f"DROP без гонки")
@@ -196,7 +212,7 @@ class SiteTestRunner(DiscoverRunner):
         ours = [r for r in rows
                 if r[4] == app_name and r[0] not in excluded]
         foreign = [r for r in rows if r[4] != app_name]
-        terminated = []
+        terminated, terminate_failed = [], []
         if ours:
             for pid, state, query, backend_start, app in ours:
                 snippet = (query or "").strip().replace("\n", " ")[:120]
@@ -205,7 +221,10 @@ class SiteTestRunner(DiscoverRunner):
                       f"last_query={snippet!r}")
                 with pg.cursor() as cur:
                     cur.execute("SELECT pg_terminate_backend(%s)", [pid])
-                terminated.append(pid)
+                    ok = cur.fetchone()[0]
+                # Результат pg_terminate_backend проверяется: pid попадает
+                # в terminated ТОЛЬКО при фактическом успехе.
+                (terminated if ok else terminate_failed).append(pid)
             while time.monotonic() - deadline < DRAIN_TIMEOUT:
                 rows = self._sessions_on(pg, test_name)
                 ours = [r for r in rows
@@ -213,11 +232,12 @@ class SiteTestRunner(DiscoverRunner):
                 if not ours:
                     break
                 time.sleep(0.05)
-            if ours:
-                pids = [r[0] for r in ours]
-                print(f"[test_runner] WARNING: own sessions still present "
-                      f"on {test_name!r}: {pids}")
-        return {"terminated": terminated, "foreign": foreign,
+        own_remaining = [r[0] for r in ours]
+        if own_remaining:
+            print(f"[test_runner] WARNING: own sessions still present "
+                  f"on {test_name!r}: {own_remaining}")
+        return {"terminated": terminated, "terminate_failed": terminate_failed,
+                "own_remaining": own_remaining, "foreign": foreign,
                 "deadline": deadline, "excluded": sorted(excluded)}
 
     @staticmethod
